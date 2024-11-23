@@ -34,7 +34,7 @@ publishing {
             groupId = "net.momirealms"
             artifactId = "sparrow-nbt"
             version = rootProject.version.toString()
-            artifact(tasks.build)
+            artifact(tasks.jar)
         }
     }
 }
