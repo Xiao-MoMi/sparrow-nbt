@@ -9,7 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Utility class for creating and handling NBT (Named Binary Tag) objects.
+ * Provides methods for creating, reading, writing, and converting NBT tags.
+ */
 public class NBT {
+
+    private NBT() {}
 
     public static ByteTag createByte(byte b) {
         return new ByteTag(b);
@@ -75,6 +81,13 @@ public class NBT {
         return new ListTag(tags, type);
     }
 
+    /**
+     * Reads an unnamed NBT tag from a DataInput stream.
+     *
+     * @param input the input stream to read from
+     * @return the read NBT tag
+     * @throws IOException if an I/O error occurs
+     */
     private static Tag readUnnamedTag(DataInput input) throws IOException {
         byte typeId = input.readByte();
         if (typeId == 0) {
@@ -89,6 +102,13 @@ public class NBT {
         }
     }
 
+    /**
+     * Writes an unnamed NBT tag to a DataOutput stream.
+     *
+     * @param tag    the tag to write
+     * @param output the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     private static void writeUnnamedTag(Tag tag, DataOutput output) throws IOException {
         output.writeByte(tag.getId());
         if (tag.getId() != Tag.TAG_END_ID) {
@@ -97,6 +117,13 @@ public class NBT {
         }
     }
 
+    /**
+     * Reads a CompoundTag from a DataInput stream.
+     *
+     * @param input the input stream to read from
+     * @return the read CompoundTag
+     * @throws IOException if an I/O error occurs or the root tag is not a CompoundTag
+     */
     public static CompoundTag readCompound(DataInput input) throws IOException {
         Tag tag = readUnnamedTag(input);
         if (tag instanceof CompoundTag) {
@@ -106,10 +133,24 @@ public class NBT {
         }
     }
 
+    /**
+     * Writes a CompoundTag to a DataOutput stream.
+     *
+     * @param nbt    the CompoundTag to write
+     * @param output the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     public static void writeCompound(CompoundTag nbt, DataOutput output) throws IOException {
         writeUnnamedTag(nbt, output);
     }
 
+    /**
+     * Reads a CompoundTag from a file.
+     *
+     * @param file the file to read from
+     * @return the read CompoundTag, or null if the file does not exist or is empty
+     * @throws IOException if an I/O error occurs
+     */
     @Nullable
     public static CompoundTag readFile(File file) throws IOException {
         if (!file.exists()) {
@@ -124,6 +165,13 @@ public class NBT {
         }
     }
 
+    /**
+     * Writes a CompoundTag to a file.
+     *
+     * @param file the file to write to
+     * @param nbt  the CompoundTag to write
+     * @throws IOException if an I/O error occurs
+     */
     public static void writeFile(File file, CompoundTag nbt) throws IOException {
         try (FileOutputStream fileOutputStream = new FileOutputStream(file);
              DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream)) {
@@ -131,6 +179,13 @@ public class NBT {
         }
     }
 
+    /**
+     * Converts a byte array to a CompoundTag.
+     *
+     * @param bytes the byte array to convert
+     * @return the CompoundTag, or null if the byte array is null or empty
+     * @throws IOException if an I/O error occurs
+     */
     @Nullable
     public static CompoundTag fromBytes(byte[] bytes) throws IOException {
         if (bytes == null || bytes.length == 0) {
@@ -142,6 +197,13 @@ public class NBT {
         }
     }
 
+    /**
+     * Converts a CompoundTag to a byte array.
+     *
+     * @param nbt the CompoundTag to convert
+     * @return the byte array representing the CompoundTag
+     * @throws IOException if an I/O error occurs
+     */
     public static byte @NotNull [] toBytes(@NotNull CompoundTag nbt) throws IOException {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {

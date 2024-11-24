@@ -4,6 +4,8 @@ import java.util.UUID;
 
 public class UUIDUtil {
 
+    private UUIDUtil() {}
+
     public static UUID uuidFromIntArray(int[] array) {
         return new UUID((long) array[0] << 32 | (long) array[1] & 4294967295L, (long) array[2] << 32 | (long) array[3] & 4294967295L);
     }

@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 
 public class ArrayUtil {
 
+    private ArrayUtil() {}
+
     public static int[] add(int[] array, int index, int element) {
         return (int[]) add(array, index, element, Integer.class);
     }

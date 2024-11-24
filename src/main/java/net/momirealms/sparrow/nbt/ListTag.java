@@ -85,7 +85,13 @@ public class ListTag extends CollectionTag<Tag> {
         return false;
     }
 
-    private boolean isValidType(Tag tag) {
+    /**
+     * Checks if the provided tag is of a valid type for this list.
+     *
+     * @param tag the tag to validate
+     * @return true if the tag is valid, false otherwise
+     */
+    public boolean isValidType(Tag tag) {
         if (tag.getId() == 0) {
             return false;
         }
@@ -152,90 +158,233 @@ public class ListTag extends CollectionTag<Tag> {
         visitor.visitList(this);
     }
 
+    /**
+     * Retrieves a String from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the String value at the specified index, or {@code null} if not found or type mismatch
+     */
     public String getString(int index) {
         return getString(index, null);
     }
 
+    /**
+     * Retrieves a String from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a String or does not exist
+     * @return the String value at the specified index, or the default value
+     */
     public String getString(int index, String defaultValue) {
         return this.getTypedValue(index, TAG_STRING_ID, Tag::getAsString, defaultValue);
     }
 
+    /**
+     * Retrieves a float from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the float value at the specified index, or 0 if not found or type mismatch
+     */
     public float getFloat(int index) {
         return getFloat(index, 0f);
     }
 
+    /**
+     * Retrieves a float from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a float or does not exist
+     * @return the float value at the specified index, or the default value
+     */
     public float getFloat(int index, float defaultValue) {
         return this.getTypedValue(index, TAG_FLOAT_ID, t -> ((FloatTag) t).getAsFloat(), defaultValue);
     }
 
+    /**
+     * Retrieves a double from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the double value at the specified index, or 0 if not found or type mismatch
+     */
     public double getDouble(int index) {
         return getDouble(index, 0d);
     }
 
+    /**
+     * Retrieves a double from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a double or does not exist
+     * @return the double value at the specified index, or the default value
+     */
     public double getDouble(int index, double defaultValue) {
         return this.getTypedValue(index, TAG_DOUBLE_ID, t -> ((DoubleTag) t).getAsDouble(), defaultValue);
     }
 
+    /**
+     * Retrieves a long array from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the long array at the specified index, or {@code null} if not found or type mismatch
+     */
     public long[] getLongArray(int index) {
         return getLongArray(index, null);
     }
 
+    /**
+     * Retrieves a long array from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a long array or does not exist
+     * @return the long array at the specified index, or the default value
+     */
     public long[] getLongArray(int index, long[] defaultValue) {
         return this.getTypedValue(index, TAG_LONG_ARRAY_ID, t -> ((LongArrayTag) t).getAsLongArray(), defaultValue);
     }
 
+    /**
+     * Retrieves an int array from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the int array at the specified index, or {@code null} if not found or type mismatch
+     */
     public int[] getIntArray(int index) {
         return getIntArray(index, null);
     }
 
+    /**
+     * Retrieves an int array from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not an int array or does not exist
+     * @return the int array at the specified index, or the default value
+     */
     public int[] getIntArray(int index, int[] defaultValue) {
         return this.getTypedValue(index, TAG_INT_ARRAY_ID, t -> ((IntArrayTag) t).getAsIntArray(), defaultValue);
     }
 
+    /**
+     * Retrieves an int from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the int value at the specified index, or 0 if not found or type mismatch
+     */
     public int getInt(int index) {
         return getInt(index, 0);
     }
 
+    /**
+     * Retrieves an int from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not an int or does not exist
+     * @return the int value at the specified index, or the default value
+     */
     public int getInt(int index, int defaultValue) {
         return this.getTypedValue(index, TAG_INT_ID, t -> ((IntTag) t).getAsInt(), defaultValue);
     }
 
+    /**
+     * Retrieves a short from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the short value at the specified index, or 0 if not found or type mismatch
+     */
     public short getShort(int index) {
         return getShort(index, (short) 0);
     }
 
+    /**
+     * Retrieves a short from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a short or does not exist
+     * @return the short value at the specified index, or the default value
+     */
     public short getShort(int index, short defaultValue) {
         return this.getTypedValue(index, TAG_SHORT_ID, t -> ((ShortTag) t).getAsShort(), defaultValue);
     }
 
+    /**
+     * Retrieves a byte from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the byte value at the specified index, or 0 if not found or type mismatch
+     */
     public byte getByte(int index) {
         return this.getByte(index, (byte) 0);
     }
 
+    /**
+     * Retrieves a byte from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a byte or does not exist
+     * @return the byte value at the specified index, or the default value
+     */
     public byte getByte(int index, byte defaultValue) {
         return this.getTypedValue(index, TAG_BYTE_ID, t -> ((ByteTag) t).getAsByte(), defaultValue);
     }
 
+    /**
+     * Retrieves a long from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the long value at the specified index, or 0 if not found or type mismatch
+     */
     public long getLong(int index) {
         return getLong(index, 0);
     }
 
+    /**
+     * Retrieves a long from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a long or does not exist
+     * @return the long value at the specified index, or the default value
+     */
     public long getLong(int index, long defaultValue) {
         return this.getTypedValue(index, TAG_LONG_ID, t -> ((LongTag) t).getAsLong(), defaultValue);
     }
 
+    /**
+     * Retrieves a ListTag from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the ListTag at the specified index, or {@code null} if not found or type mismatch
+     */
     public ListTag getList(int index) {
         return getList(index, null);
     }
 
+    /**
+     * Retrieves a ListTag from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a ListTag or does not exist
+     * @return the ListTag at the specified index, or the default value
+     */
     public ListTag getList(int index, ListTag defaultValue) {
         return this.getTypedValue(index, TAG_LIST_ID, t -> (ListTag) t, defaultValue);
     }
 
+    /**
+     * Retrieves a CompoundTag from the list at the specified index.
+     *
+     * @param index the index of the element
+     * @return the CompoundTag at the specified index, or {@code null} if not found or type mismatch
+     */
     public CompoundTag getCompound(int index) {
         return getCompound(index, null);
     }
 
+    /**
+     * Retrieves a CompoundTag from the list at the specified index, with a default value.
+     *
+     * @param index the index of the element
+     * @param defaultValue the default value to return if the element is not a CompoundTag or does not exist
+     * @return the CompoundTag at the specified index, or the default value
+     */
     public CompoundTag getCompound(int index, CompoundTag defaultValue) {
         return this.getTypedValue(index, TAG_COMPOUND_ID, t -> (CompoundTag) t, defaultValue);
     }

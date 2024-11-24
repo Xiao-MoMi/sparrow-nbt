@@ -57,28 +57,36 @@ public class StringTag implements Tag {
         return this.value.hashCode();
     }
 
+    /**
+     * Escapes special characters in the given string and wraps the result in quotes.
+     * The function dynamically determines whether to use single quotes ('') or double quotes ("")
+     * based on the contents of the string, escaping quotes and backslashes as needed.
+     *
+     * @param value the input string to be quoted and escaped
+     * @return the escaped and quoted string
+     */
     public static String quoteAndEscape(String value) {
         StringBuilder stringBuilder = new StringBuilder(" ");
-        char c = 0;
+        char quoteChar = 0;
         for (int i = 0; i < value.length(); ++i) {
-            char d = value.charAt(i);
-            if (d == '\\') {
+            char currentChar = value.charAt(i);
+            if (currentChar == '\\') {
                 stringBuilder.append('\\');
-            } else if (d == '"' || d == '\'') {
-                if (c == 0) {
-                    c = (char) (d == '"' ? 39 : 34);
+            } else if (currentChar == '"' || currentChar == '\'') {
+                if (quoteChar == 0) {
+                    quoteChar = currentChar == '"' ? '\'' : '"';
                 }
-                if (c == d) {
+                if (quoteChar == currentChar) {
                     stringBuilder.append('\\');
                 }
             }
-            stringBuilder.append(d);
+            stringBuilder.append(currentChar);
         }
-        if (c == 0) {
-            c = '"';
+        if (quoteChar == 0) {
+            quoteChar = '"';
         }
-        stringBuilder.setCharAt(0, c);
-        stringBuilder.append(c);
+        stringBuilder.setCharAt(0, quoteChar);
+        stringBuilder.append(quoteChar);
         return stringBuilder.toString();
     }
 

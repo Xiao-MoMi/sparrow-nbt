@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class TagTypes {
 
+    private TagTypes() {}
+
     public static final TagType<EndTag> END = new TagType<>() {
 
         @Override
@@ -319,6 +321,13 @@ public class TagTypes {
     private static final TagType<?>[] TYPES = new TagType[]{
             END, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY, LONG_ARRAY};
 
+    /**
+     * Retrieves the TagType associated with the given tag ID.
+     *
+     * @param id the ID of the tag type to retrieve
+     * @return the TagType corresponding to the given ID
+     * @throws ArrayIndexOutOfBoundsException if the ID is out of the valid range
+     */
     public static TagType<?> typeById(int id) {
         return TYPES[id];
     }
