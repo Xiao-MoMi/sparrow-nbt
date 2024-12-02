@@ -498,7 +498,7 @@ public class CompoundTag implements Tag {
     }
 
     @Override
-    public Tag copy() {
+    public CompoundTag copy() {
         Map<String, Tag> newTags = new HashMap<>(tags.size(), 0.8f);
         for (Map.Entry<String, Tag> entry : tags.entrySet()) {
             newTags.put(entry.getKey(), entry.getValue().copy());
@@ -507,7 +507,7 @@ public class CompoundTag implements Tag {
     }
 
     @Override
-    public Tag deepClone() {
+    public CompoundTag deepClone() {
         Map<String, Tag> newTags = new HashMap<>(tags.size(), 0.8f);
         for (Map.Entry<String, Tag> entry : tags.entrySet()) {
             newTags.put(entry.getKey(), entry.getValue().deepClone());
