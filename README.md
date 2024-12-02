@@ -6,6 +6,6 @@ repositories {
 ```
 ```kotlin
 dependencies {
-    compileOnly("com.github.Xiao-MoMi:sparrow-nbt:0.2")
+    compileOnly("com.github.Xiao-MoMi:sparrow-nbt:0.3")
 }
 ```
