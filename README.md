@@ -1,11 +1,11 @@
 ### Gradle
 ```kotlin
 repositories {
-    maven("https://jitpack.io/")
+    maven("https://repo.momirealms.net/releases/")
 }
 ```
 ```kotlin
 dependencies {
-    compileOnly("com.github.Xiao-MoMi:sparrow-nbt:0.3")
+    implementation("net.momirealms:sparrow-nbt:0.3")
 }
 ```

@@ -20,6 +20,7 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
@@ -29,12 +30,32 @@ tasks.withType<JavaCompile> {
 }
 
 publishing {
+    repositories {
+        maven {
+            url = uri("https://repo.momirealms.net/releases")
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("REPO_USERNAME")
+                password = System.getenv("REPO_PASSWORD")
+            }
+        }
+    }
     publications {
         create<MavenPublication>("mavenJava") {
             groupId = "net.momirealms"
             artifactId = "sparrow-nbt"
-            version = rootProject.version.toString()
-            artifact(tasks.jar)
+            from(components["java"])
+            pom {
+                name = "Sparrow NBT"
+                url = "https://github.com/Xiao-MoMi/sparrow-nbt"
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://opensource.org/licenses/MIT"
+                        distribution = "repo"
+                    }
+                }
+            }
         }
     }
 }
+
