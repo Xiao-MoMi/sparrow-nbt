@@ -51,6 +51,7 @@ import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("all")
 class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private static final Optional<Provider> SERVICE = Services.service(Provider.class);
     private static final Consumer<Builder> BUILDER = SERVICE
@@ -103,6 +104,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private static final String SELECTOR = "selector";
     private static final String SELECTOR_SEPARATOR = "separator";
 
+    private static final String NBT_SOURCE = "source";
     private static final String NBT = "nbt";
     private static final String NBT_INTERPRET = "interpret";
     private static final String NBT_SEPARATOR = "separator";
@@ -121,26 +123,27 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         if (input instanceof StringTag) {
             return Component.text(input.getAsString());
         }
+        // TODO ListTag 1.21.5
         if (!(input instanceof CompoundTag compound)) {
             throw new IllegalArgumentException("The input isn't a compound or string binary tag");
         }
+        // Optional. Specifies the content type. One of "text", "translatable", "score", "selector", "keybind", or "nbt".
         String type = compound.getString(TYPE);
-        if (type.isEmpty()) {
-            if (compound.get(TEXT) != null) {
+        if (type == null) {
+            if (compound.containsKey(TEXT)) {
                 type = TYPE_TEXT;
-            } else if (compound.get(TRANSLATE_KEY) != null) {
+            } else if (compound.containsKey(TRANSLATE_KEY)) {
                 type = TYPE_TRANSLATABLE;
-            } else if (compound.get(KEYBIND) != null) {
+            } else if (compound.containsKey(KEYBIND)) {
                 type = TYPE_KEYBIND;
-            } else if (compound.get(SCORE) != null) {
+            } else if (compound.containsKey(SCORE)) {
                 type = TYPE_SCORE;
-            } else if (compound.get(SELECTOR) != null) {
+            } else if (compound.containsKey(SELECTOR)) {
                 type = TYPE_SELECTOR;
-            } else if (compound.get(NBT) != null && (compound.get(NBT_BLOCK) != null
-                    || compound.get(NBT_STORAGE) != null || compound.get(NBT_ENTITY) != null)) {
+            } else if (compound.containsKey(NBT) && (compound.containsKey(NBT_SOURCE) || compound.containsKey(NBT_BLOCK) || compound.containsKey(NBT_STORAGE) || compound.containsKey(NBT_ENTITY))) {
                 type = TYPE_NBT;
             } else {
-                throw new IllegalArgumentException("Could not guess type of the component");
+                throw new IllegalArgumentException("Could not infer the type of the component");
             }
         }
 
@@ -159,16 +162,13 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
             case TYPE_TRANSLATABLE:
                 ListTag binaryArguments = compound.getList(TRANSLATE_WITH);
                 String fallback = compound.getString(TRANSLATE_FALLBACK);
-
                 if (fallback.isEmpty()) {
                     fallback = null;
                 }
-
                 List<Component> arguments = new ArrayList<>();
                 for (Tag argument : binaryArguments) {
                     arguments.add(this.deserialize(argument));
                 }
-
                 return Component.translatable()
                         .key(compound.getString(TRANSLATE_KEY))
                         .fallback(fallback)
@@ -214,8 +214,6 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     nbtSeparator = this.deserialize(binaryNbtSeparator);
                 }
                 Tag binaryBlock = compound.get(NBT_BLOCK);
-                Tag binaryEntity = compound.get(NBT_ENTITY);
-                Tag binaryStorage = compound.get(NBT_STORAGE);
                 if (binaryBlock != null) {
                     BlockNBTComponent.Pos pos = BlockNBTComponent.Pos.fromString(binaryBlock.getAsString());
                     return Component.blockNBT()
@@ -226,7 +224,9 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                             .style(style)
                             .append(children)
                             .build();
-                } else if (binaryEntity != null) {
+                }
+                Tag binaryEntity = compound.get(NBT_ENTITY);
+                if (binaryEntity != null) {
                     return Component.entityNBT()
                             .nbtPath(nbtPath)
                             .interpret(nbtInterpret)
@@ -235,7 +235,9 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                             .style(style)
                             .append(children)
                             .build();
-                } else if (binaryStorage != null) {
+                }
+                Tag binaryStorage = compound.get(NBT_STORAGE);
+                if (binaryStorage != null) {
                     return Component.storageNBT()
                             .nbtPath(nbtPath)
                             .interpret(nbtInterpret)
@@ -262,18 +264,14 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private @NotNull CompoundTag writeCompoundComponent(@NotNull Component component) {
         CompoundTag builder = new CompoundTag();
         NBTStyleSerializer.serialize(component.style(), builder, this);
-
         if (component instanceof TextComponent) {
             this.writeComponentType(TYPE_TEXT, builder);
             builder.putString(TEXT, ((TextComponent) component).content());
         } else if (component instanceof TranslatableComponent) {
             this.writeComponentType(TYPE_TRANSLATABLE, builder);
-
             TranslatableComponent translatable = (TranslatableComponent) component;
             builder.putString(TRANSLATE_KEY, translatable.key());
-
             List<TranslationArgument> arguments = translatable.arguments();
-
             if (!arguments.isEmpty()) {
                 List<Tag> argumentsTags = new ArrayList<>();
                 for (TranslationArgument argument : arguments) {
@@ -281,7 +279,6 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 }
                 builder.put(TRANSLATE_WITH, new ListTag(argumentsTags));
             }
-
             String fallback = translatable.fallback();
             if (fallback != null) {
                 builder.putString(TRANSLATE_FALLBACK, fallback);
@@ -298,26 +295,21 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
             builder.put(SCORE, scoreBuilder);
         } else if (component instanceof SelectorComponent) {
             this.writeComponentType(TYPE_SELECTOR, builder);
-
             SelectorComponent selector = (SelectorComponent) component;
             builder.putString(SELECTOR, selector.pattern());
-
             Component separator = selector.separator();
             if (separator != null) {
                 builder.put(SELECTOR_SEPARATOR, this.serialize(separator));
             }
         } else if (component instanceof NBTComponent) {
             this.writeComponentType(TYPE_NBT, builder);
-
             NBTComponent<?, ?> nbt = (NBTComponent<?, ?>) component;
             builder.putString(NBT, nbt.nbtPath());
             builder.putBoolean(NBT_INTERPRET, nbt.interpret());
-
             Component separator = nbt.separator();
             if (separator != null) {
                 builder.put(NBT_SEPARATOR, this.serialize(separator));
             }
-
             if (nbt instanceof BlockNBTComponent) {
                 builder.putString(NBT_BLOCK, ((BlockNBTComponent) nbt).pos().asString());
             } else if (nbt instanceof EntityNBTComponent) {
@@ -330,19 +322,14 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         } else {
             throw notSureHowToSerialize(component);
         }
-
         List<Component> children = component.children();
-
         if (!children.isEmpty()) {
             List<Tag> serializedChildren = new ArrayList<>();
-
             for (Component child : children) {
                 serializedChildren.add(this.writeCompoundComponent(child));
             }
-
             builder.put(EXTRA, new ListTag(serializedChildren));
         }
-
         return builder;
     }
 

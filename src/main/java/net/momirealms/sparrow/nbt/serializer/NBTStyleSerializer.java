@@ -3,14 +3,8 @@ package net.momirealms.sparrow.nbt.serializer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.momirealms.sparrow.nbt.ByteTag;
-import net.momirealms.sparrow.nbt.CompoundTag;
-import net.momirealms.sparrow.nbt.StringTag;
-import net.momirealms.sparrow.nbt.Tag;
+import net.kyori.adventure.text.format.*;
+import net.momirealms.sparrow.nbt.*;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("all")
@@ -23,8 +17,9 @@ class NBTStyleSerializer {
     private static final String OBFUSCATED = "obfuscated";
     private static final String FONT = "font";
     private static final String INSERTION = "insertion";
-    private static final String CLICK_EVENT = "clickEvent";
-    private static final String HOVER_EVENT = "hoverEvent";
+    private static final String SHADOW_COLOR = "shadow_color";
+    private static final String CLICK_EVENT_LEGACY = "clickEvent";
+    private static final String HOVER_EVENT_LEGACY = "hoverEvent";
 
     private NBTStyleSerializer() {
     }
@@ -48,15 +43,27 @@ class NBTStyleSerializer {
         if (!fontString.isEmpty()) {
             styleBuilder.font(Key.key(fontString));
         }
+        Tag binaryClickEvent = compound.get(CLICK_EVENT_LEGACY);
+        if (binaryClickEvent != null) {
+            styleBuilder.clickEvent(NBTClickEventSerializer.deserialize((CompoundTag) binaryClickEvent));
+        }
         Tag binaryInsertion = compound.get(INSERTION);
         if (binaryInsertion != null) {
             styleBuilder.insertion(((StringTag) binaryInsertion).getAsString());
         }
-        Tag binaryClickEvent = compound.get(CLICK_EVENT);
-        if (binaryClickEvent != null) {
-            styleBuilder.clickEvent(NBTClickEventSerializer.deserialize((CompoundTag) binaryClickEvent));
+        Tag binaryShadewColor = compound.get(SHADOW_COLOR);
+        if (binaryShadewColor != null) {
+            if (binaryShadewColor instanceof IntTag intTag) {
+                styleBuilder.shadowColor(ShadowColor.shadowColor(intTag.getAsInt()));
+            } else if (binaryShadewColor instanceof ListTag listTag && listTag.size() == 4) {
+                int r = (int) listTag.getFloat(0) * 255;
+                int g = (int) listTag.getFloat(1) * 255;
+                int b = (int) listTag.getFloat(2) * 255;
+                int a = (int) listTag.getFloat(3) * 255;
+                styleBuilder.shadowColor(ShadowColor.shadowColor(r, g, b, a));
+            }
         }
-        Tag binaryHoverEvent = compound.get(HOVER_EVENT);
+        Tag binaryHoverEvent = compound.get(HOVER_EVENT_LEGACY);
         if (binaryHoverEvent != null) {
             styleBuilder.hoverEvent(NBTHoverEventSerializer.deserialize((CompoundTag) binaryHoverEvent, serializer));
         }
@@ -69,11 +76,9 @@ class NBTStyleSerializer {
         if (color != null) {
             tag.putString(COLOR, color.toString());
         }
-
         style.decorations().forEach((decoration, state) -> {
             if (state != TextDecoration.State.NOT_SET) {
                 String decorationName;
-
                 switch (decoration) {
                     case OBFUSCATED:
                         decorationName = OBFUSCATED;
@@ -91,43 +96,38 @@ class NBTStyleSerializer {
                         decorationName = ITALIC;
                         break;
                     default:
-                        // Never called, but needed for proper compilation
                         throw new IllegalStateException("Unknown text decoration: " + decoration);
                 }
-
                 tag.putBoolean(decorationName, state == TextDecoration.State.TRUE);
             }
         });
-
         Key font = style.font();
-
         if (font != null) {
             tag.putString(FONT, font.asString());
         }
-
         String insertion = style.insertion();
-
         if (insertion != null) {
             tag.putString(INSERTION, insertion);
         }
-
         ClickEvent clickEvent = style.clickEvent();
-
         if (clickEvent != null) {
-            tag.put(CLICK_EVENT, NBTClickEventSerializer.serialize(clickEvent));
+            tag.put(CLICK_EVENT_LEGACY, NBTClickEventSerializer.serialize(clickEvent));
         }
-
         HoverEvent<?> hoverEvent = style.hoverEvent();
         if (hoverEvent != null) {
-            tag.put(HOVER_EVENT, NBTHoverEventSerializer.serialize(hoverEvent, serializer));
+            tag.put(HOVER_EVENT_LEGACY, NBTHoverEventSerializer.serialize(hoverEvent, serializer));
+        }
+        ShadowColor shadowColor = style.shadowColor();
+        if (shadowColor != null) {
+            tag.put(SHADOW_COLOR, new IntTag(shadowColor.value()));
         }
     }
 
     private static TextDecoration.@NotNull State readOptionalState(@NotNull String key, @NotNull CompoundTag compound) {
         Tag tag = compound.get(key);
-        if (tag == null) {
+        if (!(tag instanceof ByteTag byteTag)) {
             return TextDecoration.State.NOT_SET;
         }
-        return TextDecoration.State.byBoolean(((ByteTag) tag).booleanValue());
+        return TextDecoration.State.byBoolean(byteTag.booleanValue());
     }
 }

@@ -88,12 +88,14 @@ public class NBT {
      * @return the read NBT tag
      * @throws IOException if an I/O error occurs
      */
-    public static Tag readUnnamedTag(DataInput input) throws IOException {
+    public static Tag readUnnamedTag(DataInput input, boolean named) throws IOException {
         byte typeId = input.readByte();
         if (typeId == 0) {
             return EndTag.INSTANCE;
         } else {
-            StringTag.skipString(input);
+            if (named) {
+                StringTag.skipString(input);
+            }
             try {
                 return TagTypes.typeById(typeId).read(input, 0);
             } catch (IOException ioException) {
@@ -109,10 +111,12 @@ public class NBT {
      * @param output the output stream to write to
      * @throws IOException if an I/O error occurs
      */
-    public static void writeUnnamedTag(Tag tag, DataOutput output) throws IOException {
+    public static void writeUnnamedTag(Tag tag, DataOutput output, boolean named) throws IOException {
         output.writeByte(tag.getId());
         if (tag.getId() != Tag.TAG_END_ID) {
-            output.writeUTF("");
+            if (named) {
+                output.writeUTF("");
+            }
             tag.write(output);
         }
     }
@@ -124,8 +128,8 @@ public class NBT {
      * @return the read CompoundTag
      * @throws IOException if an I/O error occurs or the root tag is not a CompoundTag
      */
-    public static CompoundTag readCompound(DataInput input) throws IOException {
-        Tag tag = readUnnamedTag(input);
+    public static CompoundTag readCompound(DataInput input, boolean named) throws IOException {
+        Tag tag = readUnnamedTag(input, named);
         if (tag instanceof CompoundTag) {
             return (CompoundTag) tag;
         } else {
@@ -140,8 +144,8 @@ public class NBT {
      * @param output the output stream to write to
      * @throws IOException if an I/O error occurs
      */
-    public static void writeCompound(CompoundTag nbt, DataOutput output) throws IOException {
-        writeUnnamedTag(nbt, output);
+    public static void writeCompound(CompoundTag nbt, DataOutput output, boolean named) throws IOException {
+        writeUnnamedTag(nbt, output, named);
     }
 
     /**
@@ -161,7 +165,7 @@ public class NBT {
         }
         try (FileInputStream fis = new FileInputStream(file);
              DataInputStream input = new DataInputStream(fis)) {
-            return readCompound(input);
+            return readCompound(input, false);
         }
     }
 
@@ -175,7 +179,7 @@ public class NBT {
     public static void writeFile(File file, CompoundTag nbt) throws IOException {
         try (FileOutputStream fileOutputStream = new FileOutputStream(file);
              DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream)) {
-            writeCompound(nbt, dataOutputStream);
+            writeCompound(nbt, dataOutputStream, false);
         }
     }
 
@@ -193,7 +197,7 @@ public class NBT {
         }
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
              DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
-            return readCompound(dataInputStream);
+            return readCompound(dataInputStream, false);
         }
     }
 
@@ -207,7 +211,7 @@ public class NBT {
     public static byte @NotNull [] toBytes(@NotNull CompoundTag nbt) throws IOException {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-            writeCompound(nbt, dataOutputStream);
+            writeCompound(nbt, dataOutputStream, false);
             return byteArrayOutputStream.toByteArray();
         }
     }
