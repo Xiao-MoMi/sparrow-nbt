@@ -27,7 +27,7 @@ class NBTStyleSerializer {
     static @NotNull Style deserialize(@NotNull CompoundTag compound, @NotNull NBTComponentSerializerImpl serializer) {
         Style.Builder styleBuilder = Style.style();
         String colorString = compound.getString(COLOR);
-        if (!colorString.isEmpty()) {
+        if (colorString != null) {
             if (colorString.startsWith(TextColor.HEX_PREFIX)) {
                 styleBuilder.color(TextColor.fromHexString(colorString));
             } else {
@@ -40,7 +40,7 @@ class NBTStyleSerializer {
                 .decoration(TextDecoration.STRIKETHROUGH, readOptionalState(STRIKETHROUGH, compound))
                 .decoration(TextDecoration.OBFUSCATED, readOptionalState(OBFUSCATED, compound));
         String fontString = compound.getString(FONT);
-        if (!fontString.isEmpty()) {
+        if (fontString != null) {
             styleBuilder.font(Key.key(fontString));
         }
         Tag binaryClickEvent = compound.get(CLICK_EVENT_LEGACY);

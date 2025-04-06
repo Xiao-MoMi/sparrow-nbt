@@ -150,7 +150,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         Style style = NBTStyleSerializer.deserialize(compound, this);
         List<Component> children = new ArrayList<>();
         ListTag binaryChildren = compound.getList(EXTRA);
-        binaryChildren.forEach(child -> children.add(this.deserialize(child)));
+        if (binaryChildren != null)
+            binaryChildren.forEach(child -> children.add(this.deserialize(child)));
 
         switch (type) {
             case TYPE_TEXT:
@@ -162,12 +163,11 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
             case TYPE_TRANSLATABLE:
                 ListTag binaryArguments = compound.getList(TRANSLATE_WITH);
                 String fallback = compound.getString(TRANSLATE_FALLBACK);
-                if (fallback.isEmpty()) {
-                    fallback = null;
-                }
                 List<Component> arguments = new ArrayList<>();
-                for (Tag argument : binaryArguments) {
-                    arguments.add(this.deserialize(argument));
+                if (binaryArguments != null) {
+                    for (Tag argument : binaryArguments) {
+                        arguments.add(this.deserialize(argument));
+                    }
                 }
                 return Component.translatable()
                         .key(compound.getString(TRANSLATE_KEY))
