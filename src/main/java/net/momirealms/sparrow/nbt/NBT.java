@@ -88,7 +88,7 @@ public class NBT {
      * @return the read NBT tag
      * @throws IOException if an I/O error occurs
      */
-    private static Tag readUnnamedTag(DataInput input) throws IOException {
+    public static Tag readUnnamedTag(DataInput input) throws IOException {
         byte typeId = input.readByte();
         if (typeId == 0) {
             return EndTag.INSTANCE;
@@ -109,7 +109,7 @@ public class NBT {
      * @param output the output stream to write to
      * @throws IOException if an I/O error occurs
      */
-    private static void writeUnnamedTag(Tag tag, DataOutput output) throws IOException {
+    public static void writeUnnamedTag(Tag tag, DataOutput output) throws IOException {
         output.writeByte(tag.getId());
         if (tag.getId() != Tag.TAG_END_ID) {
             output.writeUTF("");

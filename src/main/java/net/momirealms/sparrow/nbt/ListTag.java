@@ -9,13 +9,17 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class ListTag extends CollectionTag<Tag> {
-
     private final List<Tag> list;
     private byte type;
 
     public ListTag(List<Tag> list, byte type) {
         this.list = list;
         this.type = type;
+    }
+
+    public ListTag(List<Tag> list) {
+        this.list = list;
+        this.type = list.isEmpty() ? 0 : list.get(0).getId();
     }
 
     public ListTag() {
