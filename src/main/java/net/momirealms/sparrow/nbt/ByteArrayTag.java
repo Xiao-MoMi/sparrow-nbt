@@ -58,11 +58,6 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
     }
 
     @Override
-    public byte elementType() {
-        return TAG_BYTE_ID;
-    }
-
-    @Override
     public int size() {
         return this.value.length;
     }

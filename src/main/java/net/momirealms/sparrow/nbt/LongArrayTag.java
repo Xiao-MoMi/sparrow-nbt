@@ -59,11 +59,6 @@ public class LongArrayTag extends CollectionTag<LongTag> {
     }
 
     @Override
-    public byte elementType() {
-        return TAG_LONG_ID;
-    }
-
-    @Override
     public int size() {
         return this.value.length;
     }

@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class CompoundTag implements Tag {
-
     public final Map<String, Tag> tags;
 
     public CompoundTag(Map<String, Tag> tags) {
@@ -19,6 +18,10 @@ public class CompoundTag implements Tag {
 
     public CompoundTag() {
         this.tags = new HashMap<>(8, 0.8f);
+    }
+
+    public int size() {
+        return tags.size();
     }
 
     @NotNull

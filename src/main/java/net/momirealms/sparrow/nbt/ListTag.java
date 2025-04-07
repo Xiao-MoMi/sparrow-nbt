@@ -4,26 +4,45 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
 public class ListTag extends CollectionTag<Tag> {
     private final List<Tag> list;
-    private byte type;
-
-    public ListTag(List<Tag> list, byte type) {
-        this.list = list;
-        this.type = type;
-    }
 
     public ListTag(List<Tag> list) {
         this.list = list;
-        this.type = list.isEmpty() ? 0 : list.get(0).getId();
     }
 
     public ListTag() {
-        this(new ArrayList<>(), (byte) 0);
+        this.list = new ArrayList<>();
+    }
+
+    public static Tag tryUnwrap(CompoundTag tag) {
+        if (tag.size() == 1) {
+            Tag tag1 = tag.get("");
+            if (tag1 != null) {
+                return tag1;
+            }
+        }
+        return tag;
+    }
+
+    private static boolean isWrapper(CompoundTag tag) {
+        return tag.size() == 1 && tag.containsKey("");
+    }
+
+    public static Tag wrapIfNeeded(byte elementType, Tag tag) {
+        if (elementType != 10) { // compound
+            return tag;
+        } else {
+            return tag instanceof CompoundTag compoundTag && !isWrapper(compoundTag) ? compoundTag : wrapElement(tag);
+        }
+    }
+
+    private static CompoundTag wrapElement(Tag tag) {
+        return new CompoundTag(Map.of("", tag));
     }
 
     @Override
@@ -38,77 +57,29 @@ public class ListTag extends CollectionTag<Tag> {
 
     @Override
     public Tag set(int index, Tag tag) {
-        Tag previousTag = this.get(index);
-        if (!this.setTag(index, tag)) {
-            throw new UnsupportedOperationException(String.format(
-                    Locale.ROOT,
-                    "Cannot set tag of type %d in a list of type %d",
-                    tag.getId(),
-                    this.type
-            ));
-        }
-        return previousTag;
+        return this.list.set(index, tag);
     }
 
     @Override
     public void add(int index, Tag tag) {
-        if (!this.addTag(index, tag)) {
-            throw new UnsupportedOperationException(String.format(
-                    Locale.ROOT,
-                    "Cannot add tag of type %d to a list of type %d",
-                    tag.getId(),
-                    this.type
-            ));
-        }
+        this.list.add(index, tag);
     }
 
     @Override
     public Tag remove(int index) {
-        Tag tag = this.list.remove(index);
-        if (this.list.isEmpty()) {
-            this.type = 0;
-        }
-        return tag;
+        return this.list.remove(index);
     }
 
     @Override
     public boolean setTag(int index, Tag tag) {
-        if (this.isValidType(tag)) {
-            this.list.set(index, tag);
-            return true;
-        }
-        return false;
+        this.list.set(index, tag);
+        return true;
     }
 
     @Override
     public boolean addTag(int index, Tag tag) {
-        if (this.isValidType(tag)) {
-            this.list.add(index, tag);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the provided tag is of a valid type for this list.
-     *
-     * @param tag the tag to validate
-     * @return true if the tag is valid, false otherwise
-     */
-    public boolean isValidType(Tag tag) {
-        if (tag.getId() == 0) {
-            return false;
-        }
-        if (this.type == 0) {
-            this.type = tag.getId();
-            return true;
-        }
-        return this.type == tag.getId();
-    }
-
-    @Override
-    public byte elementType() {
-        return this.type;
+        this.list.add(index, tag);
+        return true;
     }
 
     @Override
@@ -118,11 +89,33 @@ public class ListTag extends CollectionTag<Tag> {
 
     @Override
     public void write(DataOutput output) throws IOException {
-        output.writeByte(this.type);
+        byte type = identifyRawElementType();
+        output.writeByte(type);
         output.writeInt(this.list.size());
         for (Tag tag : this.list) {
-            tag.write(output);
+            wrapIfNeeded(type, tag).write(output);
         }
+    }
+
+    public void addAndUnwrap(Tag tag) {
+        if (tag instanceof CompoundTag compoundTag) {
+            this.add(tryUnwrap(compoundTag));
+        } else {
+            this.add(tag);
+        }
+    }
+
+    public byte identifyRawElementType() {
+        byte type = 0;
+        for (Tag tag : this.list) {
+            byte id = tag.getId();
+            if (type == 0) {
+                type = id;
+            } else if (type != id) {
+                return 10;
+            }
+        }
+        return type;
     }
 
     @Override
@@ -137,15 +130,7 @@ public class ListTag extends CollectionTag<Tag> {
 
     @Override
     public ListTag copy() {
-        if (TagTypes.typeById(this.type).isValue()) {
-            return new ListTag(this.list, this.type);
-        } else {
-            List<Tag> list = new ArrayList<>(this.list.size());
-            for (Tag tag : this.list) {
-                list.add(tag.copy());
-            }
-            return new ListTag(list, this.type);
-        }
+        return new ListTag(new ArrayList<>(this.list));
     }
 
     @Override
@@ -154,7 +139,7 @@ public class ListTag extends CollectionTag<Tag> {
         for (Tag tag : this.list) {
             list.add(tag.deepClone());
         }
-        return new ListTag(list, this.type);
+        return new ListTag(list);
     }
 
     @Override
@@ -407,7 +392,7 @@ public class ListTag extends CollectionTag<Tag> {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ListTag tags)) return false;
-        return type == tags.type && Objects.equals(list, tags.list);
+        return Objects.equals(list, tags.list);
     }
 
     @Override

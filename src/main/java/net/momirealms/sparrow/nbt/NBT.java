@@ -77,8 +77,8 @@ public class NBT {
         return new ListTag();
     }
 
-    public static ListTag createList(List<Tag> tags, byte type) {
-        return new ListTag(tags, type);
+    public static ListTag createList(List<Tag> tags) {
+        return new ListTag(tags);
     }
 
     /**

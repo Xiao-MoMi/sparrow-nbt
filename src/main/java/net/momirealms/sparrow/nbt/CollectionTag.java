@@ -59,12 +59,4 @@ public abstract class CollectionTag<T extends Tag> extends AbstractList<T> imple
      * @return true if the tag was successfully added, otherwise false
      */
     public abstract boolean addTag(int index, Tag tag);
-
-    /**
-     * Gets the element type of the collection as a byte ID.
-     * The byte ID corresponds to the type of tags stored in this collection.
-     *
-     * @return the byte ID representing the type of tags in this collection
-     */
-    public abstract byte elementType();
 }

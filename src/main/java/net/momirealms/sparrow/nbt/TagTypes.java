@@ -2,9 +2,7 @@ package net.momirealms.sparrow.nbt;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TagTypes {
@@ -264,11 +262,11 @@ public class TagTypes {
                     throw new RuntimeException("Missing type on ListTag");
                 } else {
                     TagType<?> tagType = TagTypes.typeById(typeId);
-                    List<Tag> list = new ArrayList<>(length);
+                    ListTag listTag = new ListTag();
                     for (int k = 0; k < length; ++k) {
-                        list.add(tagType.read(dataInput, depth + 1));
+                        listTag.addAndUnwrap(tagType.read(dataInput, depth + 1));
                     }
-                    return new ListTag(list, typeId);
+                    return listTag;
                 }
             }
         }

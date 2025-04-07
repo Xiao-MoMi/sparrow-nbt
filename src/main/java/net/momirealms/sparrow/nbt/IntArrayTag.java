@@ -61,11 +61,6 @@ public class IntArrayTag extends CollectionTag<IntTag> {
     }
 
     @Override
-    public byte elementType() {
-        return TAG_INT_ID;
-    }
-
-    @Override
     public int size() {
         return this.value.length;
     }
