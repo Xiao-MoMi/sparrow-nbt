@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("all")
@@ -62,7 +63,7 @@ class NBTHoverEventSerializer {
         } else if (HoverEvent.ShowEntity.class.isAssignableFrom(actionType)) {
             CompoundTag showEntityContents = (CompoundTag) contents;
             Key entityType = Key.key(showEntityContents.getString(SHOW_ENTITY_TYPE));
-            UUID entityId = UUID.fromString(showEntityContents.getString(SHOW_ENTITY_ID));
+            UUID entityId = Optional.ofNullable(showEntityContents.getString(SHOW_ENTITY_ID)).map(UUID::fromString).orElse(new UUID(0, 0));
             Tag entityName = showEntityContents.get(SHOW_ENTITY_NAME);
             if (entityName != null) {
                 return HoverEvent.showEntity(entityType, entityId, serializer.deserialize(entityName));
