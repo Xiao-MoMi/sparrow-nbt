@@ -110,12 +110,9 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
 
     @Override
     public @NotNull Component deserialize(@NotNull Tag input) {
-        if (input instanceof StringTag) {
-            return Component.text(input.getAsString());
-        }
         // TODO ListTag 1.21.5
         if (!(input instanceof CompoundTag compound)) {
-            throw new IllegalArgumentException("The input isn't a compound or string binary tag");
+            return Component.text(input.getAsString());
         }
         // Optional. Specifies the content type. One of "text", "translatable", "score", "selector", "keybind", or "nbt".
         String type = compound.getString(TYPE);
