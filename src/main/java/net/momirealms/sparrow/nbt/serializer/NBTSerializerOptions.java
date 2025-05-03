@@ -3,7 +3,7 @@ package net.momirealms.sparrow.nbt.serializer;
 import net.kyori.option.Option;
 import net.kyori.option.OptionSchema;
 
-class NBTSerializerOptions {
+public class NBTSerializerOptions {
     public static final Option<Boolean> EMIT_COMPACT_TEXT_COMPONENT = OptionSchema.globalSchema().booleanOption(key("emit/compact_text_component"), true);
     public static final Option<Boolean> SERIALIZE_COMPONENT_TYPES = OptionSchema.globalSchema().booleanOption(key("serialize/component-types"), true);
     public static final Option<Boolean> EMIT_HOVER_EVENT_TYPE = OptionSchema.globalSchema().booleanOption(key("emit/modern_hover_event"), true);
