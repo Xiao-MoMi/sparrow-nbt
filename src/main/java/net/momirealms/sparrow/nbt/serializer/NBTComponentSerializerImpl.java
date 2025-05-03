@@ -103,14 +103,17 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private static final String NBT_STORAGE = "storage";
 
     private final OptionState flags;
+    public final boolean modernHoverEvent;
+    public final boolean modernClickEvent;
 
     NBTComponentSerializerImpl(@NotNull OptionState flags) {
         this.flags = flags;
+        this.modernClickEvent = flags.value(NBTSerializerOptions.EMIT_CLICK_EVENT_TYPE);
+        this.modernHoverEvent = flags.value(NBTSerializerOptions.EMIT_HOVER_EVENT_TYPE);
     }
 
     @Override
     public @NotNull Component deserialize(@NotNull Tag input) {
-        // TODO ListTag 1.21.5
         if (!(input instanceof CompoundTag compound)) {
             return Component.text(input.getAsString());
         }

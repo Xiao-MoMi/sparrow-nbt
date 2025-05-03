@@ -18,8 +18,10 @@ class NBTStyleSerializer {
     private static final String FONT = "font";
     private static final String INSERTION = "insertion";
     private static final String SHADOW_COLOR = "shadow_color";
-    private static final String CLICK_EVENT_LEGACY = "clickEvent";
-    private static final String HOVER_EVENT_LEGACY = "hoverEvent";
+    private static final String LEGACY_CLICK_EVENT = "clickEvent";
+    private static final String CLICK_EVENT = "click_event";
+    private static final String LEGACY_HOVER_EVENT = "hoverEvent";
+    private static final String HOVER_EVENT = "hover_event";
 
     private NBTStyleSerializer() {
     }
@@ -43,14 +45,24 @@ class NBTStyleSerializer {
         if (fontString != null) {
             styleBuilder.font(Key.key(fontString));
         }
-        Tag binaryClickEvent = compound.get(CLICK_EVENT_LEGACY);
+
+        String clickEvent = serializer.modernClickEvent ? CLICK_EVENT : LEGACY_CLICK_EVENT;
+        Tag binaryClickEvent = compound.get(clickEvent);
         if (binaryClickEvent != null) {
-            styleBuilder.clickEvent(NBTClickEventSerializer.deserialize((CompoundTag) binaryClickEvent));
+            styleBuilder.clickEvent(NBTClickEventSerializer.deserialize((CompoundTag) binaryClickEvent, serializer));
         }
+
+        String hoverEvent = serializer.modernHoverEvent ? HOVER_EVENT : LEGACY_HOVER_EVENT;
+        Tag binaryHoverEvent = compound.get(hoverEvent);
+        if (binaryHoverEvent != null) {
+            styleBuilder.hoverEvent(NBTHoverEventSerializer.deserialize((CompoundTag) binaryHoverEvent, serializer));
+        }
+
         Tag binaryInsertion = compound.get(INSERTION);
         if (binaryInsertion != null) {
             styleBuilder.insertion(((StringTag) binaryInsertion).getAsString());
         }
+
         Tag binaryShadewColor = compound.get(SHADOW_COLOR);
         if (binaryShadewColor != null) {
             if (binaryShadewColor instanceof IntTag intTag) {
@@ -62,10 +74,6 @@ class NBTStyleSerializer {
                 int a = (int) listTag.getFloat(3) * 255;
                 styleBuilder.shadowColor(ShadowColor.shadowColor(r, g, b, a));
             }
-        }
-        Tag binaryHoverEvent = compound.get(HOVER_EVENT_LEGACY);
-        if (binaryHoverEvent != null) {
-            styleBuilder.hoverEvent(NBTHoverEventSerializer.deserialize((CompoundTag) binaryHoverEvent, serializer));
         }
         return styleBuilder.build();
     }
@@ -111,11 +119,11 @@ class NBTStyleSerializer {
         }
         ClickEvent clickEvent = style.clickEvent();
         if (clickEvent != null) {
-            tag.put(CLICK_EVENT_LEGACY, NBTClickEventSerializer.serialize(clickEvent));
+            tag.put(serializer.modernClickEvent ? CLICK_EVENT : LEGACY_CLICK_EVENT, NBTClickEventSerializer.serialize(clickEvent, serializer));
         }
         HoverEvent<?> hoverEvent = style.hoverEvent();
         if (hoverEvent != null) {
-            tag.put(HOVER_EVENT_LEGACY, NBTHoverEventSerializer.serialize(hoverEvent, serializer));
+            tag.put(serializer.modernHoverEvent ? HOVER_EVENT : LEGACY_HOVER_EVENT, NBTHoverEventSerializer.serialize(hoverEvent, serializer));
         }
         ShadowColor shadowColor = style.shadowColor();
         if (shadowColor != null) {
