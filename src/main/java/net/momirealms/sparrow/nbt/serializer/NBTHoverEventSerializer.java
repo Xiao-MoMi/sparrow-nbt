@@ -142,7 +142,7 @@ class NBTHoverEventSerializer {
                 hoverTag.put(SHOW_TEXT_VALUE, serializer.serialize((Component) event.value()));
             } else if (action == HoverEvent.Action.SHOW_ITEM) {
                 HoverEvent.ShowItem item = (HoverEvent.ShowItem) event.value();
-                hoverTag.putString(HOVER_EVENT_SHOW_ITEM, HOVER_EVENT_SHOW_ITEM);
+                hoverTag.putString(HOVER_EVENT_ACTION, HOVER_EVENT_SHOW_ITEM);
                 hoverTag.putString(SHOW_ITEM_ID, item.item().asString());
                 hoverTag.putInt(SHOW_ITEM_COUNT, item.count());
                 Map<Key, NBTDataComponentValue> components = item.dataComponentsAs(NBTDataComponentValue.class);

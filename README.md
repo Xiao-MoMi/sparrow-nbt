@@ -10,7 +10,7 @@ repositories {
 ```
 ```kotlin
 dependencies {
-    implementation("net.momirealms:sparrow-nbt:0.8")
+    implementation("net.momirealms:sparrow-nbt:0.8.2")
 }
 ```
 Special thanks to [adventure](https://github.com/KyoriPowered/adventure) for their awesome work, which inspired this project.
