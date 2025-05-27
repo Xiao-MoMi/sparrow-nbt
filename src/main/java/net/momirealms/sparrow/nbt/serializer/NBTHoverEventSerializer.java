@@ -86,21 +86,26 @@ class NBTHoverEventSerializer {
             if (Component.class.isAssignableFrom(actionType)) {
                 return HoverEvent.showText(serializer.deserialize(contents));
             } else if (HoverEvent.ShowItem.class.isAssignableFrom(actionType)) {
-                CompoundTag showItemContents = (CompoundTag) contents;
-                Key itemId = Key.key(showItemContents.getString(SHOW_ITEM_ID));
-                int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT);
-                Tag components = showItemContents.get(SHOW_ITEM_COMPONENTS);
-                if (components != null) {
-                    CompoundTag componentsCompound = (CompoundTag) components;
-                    Map<Key, DataComponentValue> componentValues = new HashMap<>();
-                    for (String string : componentsCompound.keySet()) {
-                        Tag value = componentsCompound.get(string);
-                        if (value == null) continue;
-                        componentValues.put(Key.key(string), NBTDataComponentValue.of(value));
+                if (contents instanceof CompoundTag showItemContents) {
+                    Key itemId = Key.key(showItemContents.getString(SHOW_ITEM_ID));
+                    int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT);
+                    Tag components = showItemContents.get(SHOW_ITEM_COMPONENTS);
+                    if (components != null) {
+                        CompoundTag componentsCompound = (CompoundTag) components;
+                        Map<Key, DataComponentValue> componentValues = new HashMap<>();
+                        for (String string : componentsCompound.keySet()) {
+                            Tag value = componentsCompound.get(string);
+                            if (value == null) continue;
+                            componentValues.put(Key.key(string), NBTDataComponentValue.of(value));
+                        }
+                        return HoverEvent.showItem(itemId, itemCount, componentValues);
+                    } else {
+                        return HoverEvent.showItem(itemId, itemCount);
                     }
-                    return HoverEvent.showItem(itemId, itemCount, componentValues);
+                } else if (contents instanceof StringTag stringTag) {
+                    return HoverEvent.showItem(Key.key(stringTag.getAsString()), 1);
                 } else {
-                    return HoverEvent.showItem(itemId, itemCount);
+                    throw new IllegalArgumentException("Failed to deserialize show item hover event. Unkown tag type: " + contents.getType().name() + ". " + contents.getAsString());
                 }
             } else if (HoverEvent.ShowEntity.class.isAssignableFrom(actionType)) {
                 CompoundTag showEntityContents = (CompoundTag) contents;

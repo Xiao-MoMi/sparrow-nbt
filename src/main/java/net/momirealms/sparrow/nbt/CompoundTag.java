@@ -29,6 +29,11 @@ public class CompoundTag implements Tag {
         return this.tags.keySet();
     }
 
+    @NotNull
+    public Set<Map.Entry<String, Tag>> entrySet() {
+        return this.tags.entrySet();
+    }
+
     /**
      * Adds or replaces a tag with the specified key.
      *
@@ -463,12 +468,6 @@ public class CompoundTag implements Tag {
         return this.tags.containsKey(key);
     }
 
-    /**
-     * Checks if the compound tag contains the specified key.
-     *
-     * @param key the key to check for
-     * @return true if the compound tag contains the key, otherwise false
-     */
     public byte getTagType(String key) {
         Tag tag = this.tags.get(key);
         return tag == null ? 0 : tag.getId();

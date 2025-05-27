@@ -4,30 +4,32 @@ plugins {
 }
 
 group = "net.momirealms"
-version = "0.7.1"
+version = "0.8"
 
 repositories {
     mavenCentral()
+    maven("https://libraries.minecraft.net/")
 }
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly("net.kyori:adventure-api:4.21.0")
     compileOnly("net.kyori:option:1.1.0")
+    compileOnly("com.mojang:datafixerupper:6.0.8")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(21)
     dependsOn(tasks.clean)
 }
 
