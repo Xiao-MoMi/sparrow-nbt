@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.momirealms"
-version = "0.8"
+version = "0.8.1"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly("net.kyori:adventure-api:4.21.0")
     compileOnly("net.kyori:option:1.1.0")
-    compileOnly("com.mojang:datafixerupper:6.0.8")
+    compileOnly("com.mojang:datafixerupper:8.0.16")
 }
 
 java {
