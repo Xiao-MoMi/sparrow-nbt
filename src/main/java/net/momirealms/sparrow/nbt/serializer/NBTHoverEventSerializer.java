@@ -89,14 +89,16 @@ class NBTHoverEventSerializer {
                 if (contents instanceof CompoundTag showItemContents) {
                     Key itemId = Key.key(showItemContents.getString(SHOW_ITEM_ID));
                     int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT);
-                    Tag components = showItemContents.get(SHOW_ITEM_COMPONENTS);
-                    if (components != null) {
-                        CompoundTag componentsCompound = (CompoundTag) components;
+                    CompoundTag components = (CompoundTag) showItemContents.get(SHOW_ITEM_COMPONENTS);
+                    NBTItem nbtItem = new NBTItem(itemId, itemCount, components);
+                    serializer.itemEditor.accept(nbtItem);
+                    components = nbtItem.components();
+                    if (components != null && !components.isEmpty()) {
                         Map<Key, DataComponentValue> componentValues = new HashMap<>();
-                        for (String string : componentsCompound.keySet()) {
-                            Tag value = componentsCompound.get(string);
-                            if (value == null) continue;
-                            componentValues.put(Key.key(string), NBTDataComponentValue.of(value));
+                        for (Map.Entry<String, Tag> entry : components.entrySet()) {
+                            if (entry.getValue() != null) {
+                                componentValues.put(Key.key(entry.getKey()), NBTDataComponentValue.of(entry.getValue()));
+                            }
                         }
                         return HoverEvent.showItem(itemId, itemCount, componentValues);
                     } else {
@@ -132,8 +134,7 @@ class NBTHoverEventSerializer {
     }
 
     @NotNull
-    static <V> CompoundTag serialize(@NotNull HoverEvent<V> event,
-                                              @NotNull NBTComponentSerializerImpl serializer) {
+    static <V> CompoundTag serialize(@NotNull HoverEvent<V> event, @NotNull NBTComponentSerializerImpl serializer) {
         HoverEvent.Action<V> action = event.action();
         CompoundTag hoverTag = new CompoundTag();
         if (serializer.modernHoverEvent) {

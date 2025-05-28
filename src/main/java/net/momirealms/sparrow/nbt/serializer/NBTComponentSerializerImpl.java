@@ -65,7 +65,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     static final class Instances {
         static final NBTComponentSerializer INSTANCE = SERVICE
                 .map(Provider::nbt)
-                .orElseGet(() -> new NBTComponentSerializerImpl(OptionState.emptyOptionState()));
+                .orElseGet(() -> new NBTComponentSerializerImpl(OptionState.emptyOptionState(), (c) -> {}));
     }
 
     private static final String TYPE = "type";
@@ -105,11 +105,13 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private final OptionState flags;
     public final boolean modernHoverEvent;
     public final boolean modernClickEvent;
+    public Consumer<NBTItem> itemEditor;
 
-    NBTComponentSerializerImpl(@NotNull OptionState flags) {
+    NBTComponentSerializerImpl(@NotNull OptionState flags, Consumer<NBTItem> itemEditor) {
         this.flags = flags;
         this.modernClickEvent = flags.value(NBTSerializerOptions.EMIT_CLICK_EVENT_TYPE);
         this.modernHoverEvent = flags.value(NBTSerializerOptions.EMIT_HOVER_EVENT_TYPE);
+        this.itemEditor = itemEditor;
     }
 
     @Override
@@ -338,8 +340,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     }
 
     static final class BuilderImpl implements NBTComponentSerializer.Builder {
-
         private OptionState flags = OptionState.emptyOptionState();
+        private Consumer<NBTItem> itemEditor = (x) -> {};
 
         BuilderImpl() {
             BUILDER.accept(this);
@@ -361,8 +363,14 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         }
 
         @Override
+        public @NotNull Builder editItem(@NotNull Consumer<NBTItem> itemEditor) {
+            this.itemEditor = requireNonNull(itemEditor, "itemEditor");
+            return this;
+        }
+
+        @Override
         public @NotNull NBTComponentSerializer build() {
-            return new NBTComponentSerializerImpl(this.flags);
+            return new NBTComponentSerializerImpl(this.flags, this.itemEditor);
         }
     }
 }
