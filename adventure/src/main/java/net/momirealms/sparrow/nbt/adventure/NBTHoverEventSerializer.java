@@ -1,4 +1,4 @@
-package net.momirealms.sparrow.nbt.serializer;
+package net.momirealms.sparrow.nbt.adventure;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;

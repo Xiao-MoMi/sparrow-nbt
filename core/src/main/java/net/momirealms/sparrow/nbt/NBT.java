@@ -105,7 +105,7 @@ public class NBT {
     }
 
     /**
-     * Writes an unnamed NBT tag to a DataOutput stream.
+     * Writes a(n) (un)named NBT tag to a DataOutput stream.
      *
      * @param tag    the tag to write
      * @param output the output stream to write to
@@ -212,6 +212,21 @@ public class NBT {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
             writeCompound(nbt, dataOutputStream, false);
+            return byteArrayOutputStream.toByteArray();
+        }
+    }
+
+    /**
+     * Converts a tag to a byte array.
+     *
+     * @param nbt the CompoundTag to convert
+     * @return the byte array representing the tag
+     * @throws IOException if an I/O error occurs
+     */
+    public static byte @NotNull [] toBytes(@NotNull Tag nbt, boolean named) throws IOException {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            writeUnnamedTag(nbt, dataOutputStream, named);
             return byteArrayOutputStream.toByteArray();
         }
     }

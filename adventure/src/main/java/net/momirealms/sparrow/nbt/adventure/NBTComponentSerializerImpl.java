@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.momirealms.sparrow.nbt.serializer;
+package net.momirealms.sparrow.nbt.adventure;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.*;

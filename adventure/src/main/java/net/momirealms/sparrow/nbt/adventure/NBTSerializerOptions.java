@@ -1,4 +1,4 @@
-package net.momirealms.sparrow.nbt.serializer;
+package net.momirealms.sparrow.nbt.adventure;
 
 import net.kyori.option.Option;
 import net.kyori.option.OptionSchema;
