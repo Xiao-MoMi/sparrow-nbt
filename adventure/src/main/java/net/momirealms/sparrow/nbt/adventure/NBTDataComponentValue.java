@@ -6,11 +6,15 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.NonExtendable
-interface NBTDataComponentValue extends DataComponentValue {
+public interface NBTDataComponentValue extends DataComponentValue {
 
     @NotNull Tag tag();
 
     static @NotNull NBTDataComponentValue of(@NotNull Tag tag) {
+        return new NBTDataComponentValueImpl(tag);
+    }
+
+    static @NotNull NBTDataComponentValue nbtDataComponentValue(@NotNull Tag tag) {
         return new NBTDataComponentValueImpl(tag);
     }
 
