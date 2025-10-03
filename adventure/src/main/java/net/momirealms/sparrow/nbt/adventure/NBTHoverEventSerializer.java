@@ -55,17 +55,12 @@ class NBTHoverEventSerializer {
             return HoverEvent.showText(serializer.deserialize(compound.get(SHOW_TEXT_VALUE)));
         } else if (action == HoverEvent.Action.SHOW_ITEM) {
             Key itemId = Key.key(compound.getString(SHOW_ITEM_ID));
-            int itemCount = compound.getInt(SHOW_ITEM_COUNT);
+            int itemCount = compound.getInt(SHOW_ITEM_COUNT, 1);
             CompoundTag components = (CompoundTag) compound.get(SHOW_ITEM_COMPONENTS);
-            ShowItemInfo showItemInfo = new ShowItemInfo(itemId, itemCount, components);
-            serializer.itemEditor.accept(showItemInfo);
-            components = showItemInfo.components();
-            itemCount = showItemInfo.count();
-            itemId = showItemInfo.id();
             if (components != null) {
                 Map<Key, DataComponentValue> componentValues = new HashMap<>();
                 for (String string : components.keySet()) {
-                    Tag value = showItemInfo.components().get(string);
+                    Tag value = components.get(string);
                     if (value == null) continue;
                     componentValues.put(Key.key(string), NBTDataComponentValue.of(value));
                 }
@@ -142,13 +137,8 @@ class NBTHoverEventSerializer {
     static HoverEvent deserializeLegacyShowItem(NBTComponentSerializerImpl serializer,
                                                 @NotNull CompoundTag showItemContents) {
         Key itemId = Key.key(showItemContents.getString(SHOW_ITEM_ID));
-        int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT);
+        int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT, 1);
         String tag = showItemContents.getString(SHOW_ITEM_TAG);
-        ShowItemInfo showItemInfo = new ShowItemInfo(itemId, itemCount, tag);
-        serializer.itemEditor.accept(showItemInfo);
-        tag = showItemInfo.tag();
-        itemId = showItemInfo.id();
-        itemCount = showItemInfo.count();
         if (tag != null && !tag.isEmpty()) {
             return HoverEvent.showItem(itemId, itemCount, BinaryTagHolder.binaryTagHolder(tag));
         } else {
@@ -159,13 +149,8 @@ class NBTHoverEventSerializer {
     static HoverEvent deserializeModernShowItem(NBTComponentSerializerImpl serializer,
                                                 @NotNull CompoundTag showItemContents) {
         Key itemId = Key.key(showItemContents.getString(SHOW_ITEM_ID));
-        int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT);
+        int itemCount = showItemContents.getInt(SHOW_ITEM_COUNT, 1);
         CompoundTag components = (CompoundTag) showItemContents.get(SHOW_ITEM_COMPONENTS);
-        ShowItemInfo showItemInfo = new ShowItemInfo(itemId, itemCount, components);
-        serializer.itemEditor.accept(showItemInfo);
-        components = showItemInfo.components();
-        itemId = showItemInfo.id();
-        itemCount = showItemInfo.count();
         if (components != null && !components.isEmpty()) {
             Map<Key, DataComponentValue> componentValues = new HashMap<>();
             for (Map.Entry<String, Tag> entry : components.entrySet()) {
@@ -246,7 +231,9 @@ class NBTHoverEventSerializer {
                 }
             } else {
                 BinaryTagHolder nbt = item.nbt();
-                showItemTag.putString(SHOW_ITEM_TAG, nbt.string());
+                if (nbt != null) {
+                    showItemTag.putString(SHOW_ITEM_TAG, nbt.string());
+                }
             }
             contents = showItemTag;
             actionType = HOVER_EVENT_SHOW_ITEM;

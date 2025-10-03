@@ -65,7 +65,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     static final class Instances {
         static final NBTComponentSerializer INSTANCE = SERVICE
                 .map(Provider::nbt)
-                .orElseGet(() -> new NBTComponentSerializerImpl(OptionState.emptyOptionState(), (c) -> {}));
+                .orElseGet(() -> new NBTComponentSerializerImpl(OptionState.emptyOptionState()));
     }
 
     private static final String TYPE = "type";
@@ -106,14 +106,12 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     public final boolean modernHoverEvent;
     public final boolean modernClickEvent;
     public final boolean componentRelease;
-    public Consumer<ShowItemInfo> itemEditor;
 
-    NBTComponentSerializerImpl(@NotNull OptionState flags, Consumer<ShowItemInfo> itemEditor) {
+    NBTComponentSerializerImpl(@NotNull OptionState flags) {
         this.flags = flags;
         this.modernClickEvent = flags.value(NBTSerializerOptions.EMIT_CLICK_EVENT_TYPE);
         this.modernHoverEvent = flags.value(NBTSerializerOptions.EMIT_HOVER_EVENT_TYPE);
         this.componentRelease = flags.value(NBTSerializerOptions.DATA_COMPONENT_RELEASE);
-        this.itemEditor = itemEditor;
     }
 
     @Override
@@ -342,7 +340,6 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
 
     static final class BuilderImpl implements NBTComponentSerializer.Builder {
         private OptionState flags = OptionState.emptyOptionState();
-        private Consumer<ShowItemInfo> itemEditor = (x) -> {};
 
         BuilderImpl() {
             BUILDER.accept(this);
@@ -364,14 +361,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         }
 
         @Override
-        public @NotNull Builder editItem(@NotNull Consumer<ShowItemInfo> itemEditor) {
-            this.itemEditor = requireNonNull(itemEditor, "itemEditor");
-            return this;
-        }
-
-        @Override
         public @NotNull NBTComponentSerializer build() {
-            return new NBTComponentSerializerImpl(this.flags, this.itemEditor);
+            return new NBTComponentSerializerImpl(this.flags);
         }
     }
 }

@@ -5,8 +5,6 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-
 class NBTClickEventSerializer {
     public static final String ACTION = "action";
     public static final String CLICK_EVENT_VALUE = "value";
