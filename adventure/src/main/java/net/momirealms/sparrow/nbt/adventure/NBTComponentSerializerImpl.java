@@ -105,12 +105,14 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private final OptionState flags;
     public final boolean modernHoverEvent;
     public final boolean modernClickEvent;
-    public Consumer<NBTItem> itemEditor;
+    public final boolean componentRelease;
+    public Consumer<ShowItemInfo> itemEditor;
 
-    NBTComponentSerializerImpl(@NotNull OptionState flags, Consumer<NBTItem> itemEditor) {
+    NBTComponentSerializerImpl(@NotNull OptionState flags, Consumer<ShowItemInfo> itemEditor) {
         this.flags = flags;
         this.modernClickEvent = flags.value(NBTSerializerOptions.EMIT_CLICK_EVENT_TYPE);
         this.modernHoverEvent = flags.value(NBTSerializerOptions.EMIT_HOVER_EVENT_TYPE);
+        this.componentRelease = flags.value(NBTSerializerOptions.DATA_COMPONENT_RELEASE);
         this.itemEditor = itemEditor;
     }
 
@@ -119,7 +121,6 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         if (!(input instanceof CompoundTag compound)) {
             return Component.text(input.getAsString());
         }
-        // Optional. Specifies the content type. One of "text", "translatable", "score", "selector", "keybind", or "nbt".
         String type = compound.getString(TYPE);
         if (type == null) {
             if (compound.containsKey(TEXT)) {
@@ -341,7 +342,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
 
     static final class BuilderImpl implements NBTComponentSerializer.Builder {
         private OptionState flags = OptionState.emptyOptionState();
-        private Consumer<NBTItem> itemEditor = (x) -> {};
+        private Consumer<ShowItemInfo> itemEditor = (x) -> {};
 
         BuilderImpl() {
             BUILDER.accept(this);
@@ -363,7 +364,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         }
 
         @Override
-        public @NotNull Builder editItem(@NotNull Consumer<NBTItem> itemEditor) {
+        public @NotNull Builder editItem(@NotNull Consumer<ShowItemInfo> itemEditor) {
             this.itemEditor = requireNonNull(itemEditor, "itemEditor");
             return this;
         }

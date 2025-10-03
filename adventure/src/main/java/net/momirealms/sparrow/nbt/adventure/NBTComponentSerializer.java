@@ -33,7 +33,7 @@ public interface NBTComponentSerializer extends ComponentSerializer<Component, C
 
         @NotNull Builder editOptions(final @NotNull Consumer<OptionState.Builder> optionEditor);
 
-        @NotNull Builder editItem(@NotNull Consumer<NBTItem> itemEditor);
+        @NotNull Builder editItem(@NotNull Consumer<ShowItemInfo> itemEditor);
 
         @Override
         @NotNull NBTComponentSerializer build();
