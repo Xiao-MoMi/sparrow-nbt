@@ -59,10 +59,14 @@ class NBTHoverEventSerializer {
             CompoundTag components = (CompoundTag) compound.get(SHOW_ITEM_COMPONENTS);
             if (components != null) {
                 Map<Key, DataComponentValue> componentValues = new HashMap<>();
-                for (String string : components.keySet()) {
-                    Tag value = components.get(string);
+                for (String key : components.keySet()) {
+                    Tag value = components.get(key);
                     if (value == null) continue;
-                    componentValues.put(Key.key(string), NBTDataComponentValue.of(value));
+                    if (key.charAt(0) == '!') {
+                        componentValues.put(Key.key(key.substring(1)), NBTDataComponentValue.removed());
+                    } else {
+                        componentValues.put(Key.key(key), NBTDataComponentValue.of(value));
+                    }
                 }
                 return HoverEvent.showItem(itemId, itemCount, componentValues);
             } else {
@@ -154,8 +158,11 @@ class NBTHoverEventSerializer {
         if (components != null && !components.isEmpty()) {
             Map<Key, DataComponentValue> componentValues = new HashMap<>();
             for (Map.Entry<String, Tag> entry : components.entrySet()) {
-                if (entry.getValue() != null) {
-                    componentValues.put(Key.key(entry.getKey()), NBTDataComponentValue.of(entry.getValue()));
+                String key = entry.getKey();
+                if (key.charAt(0) == '!') {
+                    componentValues.put(Key.key(key.substring(1)), NBTDataComponentValue.removed());
+                } else {
+                    componentValues.put(Key.key(key), NBTDataComponentValue.of(entry.getValue()));
                 }
             }
             return HoverEvent.showItem(itemId, itemCount, componentValues);
@@ -188,7 +195,13 @@ class NBTHoverEventSerializer {
             if (!components.isEmpty()) {
                 CompoundTag dataComponents = new CompoundTag();
                 for (Map.Entry<Key, NBTDataComponentValue> entry : components.entrySet()) {
-                    dataComponents.put(entry.getKey().asString(), entry.getValue().tag());
+                    NBTDataComponentValue value = entry.getValue();
+                    String component = entry.getKey().asString();
+                    if (value.isRemoved()) {
+                        dataComponents.put("!" + component, value.tag());
+                    } else {
+                        dataComponents.put(component, value.tag());
+                    }
                 }
                 hoverTag.put(SHOW_ITEM_COMPONENTS, dataComponents);
             }
@@ -225,7 +238,13 @@ class NBTHoverEventSerializer {
                 if (!components.isEmpty()) {
                     CompoundTag dataComponents = new CompoundTag();
                     for (Map.Entry<Key, NBTDataComponentValue> entry : components.entrySet()) {
-                        dataComponents.put(entry.getKey().asString(), entry.getValue().tag());
+                        NBTDataComponentValue value = entry.getValue();
+                        String component = entry.getKey().asString();
+                        if (value.isRemoved()) {
+                            dataComponents.put("!" + component, value.tag());
+                        } else {
+                            dataComponents.put(component, value.tag());
+                        }
                     }
                     showItemTag.put(SHOW_ITEM_COMPONENTS, dataComponents);
                 }
