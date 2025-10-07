@@ -155,7 +155,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 type = TYPE_SELECTOR;
             } else if (compound.containsKey(NBT) && (compound.containsKey(NBT_SOURCE) || compound.containsKey(NBT_BLOCK) || compound.containsKey(NBT_STORAGE) || compound.containsKey(NBT_ENTITY))) {
                 type = TYPE_NBT;
-            } else if (compound.containsKey(OBJECT) || compound.containsKey(ATLAS) || compound.containsKey(PLAYER)) {
+            } else if (compound.containsKey(OBJECT) || compound.containsKey(SPRITE) || compound.containsKey(PLAYER)) {
                 type = TYPE_OBJECT;
             } else {
                 throw new IllegalArgumentException("Could not infer the type of the component:" + input.toString());
@@ -271,20 +271,20 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 throw new IllegalStateException("Could parse nbt component: " + input.toString());
             }
             case TYPE_OBJECT -> {
-                String object = compound.getString(OBJECT);
-                if (object.equals(PLAYER_CAPE)) {
+                if (compound.containsKey(PLAYER)) {
+                    CompoundTag playerTag = compound.getCompound(PLAYER);
                     PlayerHeadObjectContents.Builder builder = ObjectContents.playerHead();
                     if (compound.getBoolean(PLAYER_HAT)) {
                         builder.hat(true);
                     }
-                    Optional.ofNullable(compound.getString(PLAYER_NAME)).ifPresent(builder::name);
-                    Optional.ofNullable(compound.getString(PLAYER_TEXTURE)).ifPresent(texture -> {
+                    Optional.ofNullable(playerTag.getString(PLAYER_NAME)).ifPresent(builder::name);
+                    Optional.ofNullable(playerTag.getString(PLAYER_TEXTURE)).ifPresent(texture -> {
                         builder.texture(Key.key(texture));
                     });
-                    Optional.ofNullable(compound.getIntArray(PLAYER_ID)).ifPresent(uuid -> {
+                    Optional.ofNullable(playerTag.getIntArray(PLAYER_ID)).ifPresent(uuid -> {
                         builder.id(UUIDUtil.uuidFromIntArray(uuid));
                     });
-                    Optional.ofNullable(compound.getList(PLAYER_PROPERTIES)).ifPresent(properties -> {
+                    Optional.ofNullable(playerTag.getList(PLAYER_PROPERTIES)).ifPresent(properties -> {
                         List<PlayerHeadObjectContents.ProfileProperty> profileProperties = new ArrayList<>();
                         for (Tag propertyTag : properties) {
                             if (propertyTag instanceof CompoundTag compoundTag) {
@@ -301,7 +301,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         builder.profileProperties(profileProperties);
                     });
                     return Component.object(builder.build());
-                } else if (object.equals(ATLAS)) {
+                }
+                if (compound.containsKey(SPRITE)) {
                     String sprite = compound.getString(SPRITE);
                     String atlas = compound.getString(ATLAS);
                     if (atlas != null) {
@@ -309,9 +310,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     } else {
                         return Component.object(ObjectContents.sprite(Key.key(sprite)));
                     }
-                } else {
-                    throw new IllegalStateException("Could parse object component: " + input.toString());
                 }
+                throw new IllegalStateException("Could parse object component: " + input.toString());
             }
             default -> {
                 throw new IllegalArgumentException("Unknown component type " + type);
