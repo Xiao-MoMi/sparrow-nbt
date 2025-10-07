@@ -155,10 +155,10 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 type = TYPE_SELECTOR;
             } else if (compound.containsKey(NBT) && (compound.containsKey(NBT_SOURCE) || compound.containsKey(NBT_BLOCK) || compound.containsKey(NBT_STORAGE) || compound.containsKey(NBT_ENTITY))) {
                 type = TYPE_NBT;
-            } else if (compound.containsKey(OBJECT)) {
+            } else if (compound.containsKey(OBJECT) || compound.containsKey(ATLAS) || compound.containsKey(PLAYER)) {
                 type = TYPE_OBJECT;
             } else {
-                throw new IllegalArgumentException("Could not infer the type of the component");
+                throw new IllegalArgumentException("Could not infer the type of the component:" + input.toString());
             }
         }
 
