@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly("net.kyori:adventure-api:4.21.0")
+    compileOnly("net.kyori:adventure-api:4.25.0")
     compileOnly("net.kyori:option:1.1.0")
     compileOnly(project(":core"))
 }

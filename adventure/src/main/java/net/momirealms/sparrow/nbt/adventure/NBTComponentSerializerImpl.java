@@ -26,17 +26,22 @@ package net.momirealms.sparrow.nbt.adventure;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.object.ObjectContents;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
+import net.kyori.adventure.text.object.SpriteObjectContents;
 import net.kyori.adventure.util.Services;
 import net.kyori.option.OptionState;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
 import net.momirealms.sparrow.nbt.StringTag;
 import net.momirealms.sparrow.nbt.Tag;
+import net.momirealms.sparrow.nbt.util.UUIDUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
@@ -76,6 +81,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private static final String TYPE_SCORE = "score";
     private static final String TYPE_SELECTOR = "selector";
     private static final String TYPE_NBT = "nbt";
+    private static final String TYPE_OBJECT = "object";
 
     private static final String EXTRA = "extra";
 
@@ -101,6 +107,22 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private static final String NBT_BLOCK = "block";
     private static final String NBT_ENTITY = "entity";
     private static final String NBT_STORAGE = "storage";
+
+    private static final String OBJECT = "object";
+    private static final String ATLAS = "atlas";
+    private static final String SPRITE = "sprite";
+    private static final String PLAYER = "player";
+    private static final String PLAYER_NAME = "name";
+    private static final String PLAYER_ID = "id";
+    private static final String PLAYER_PROPERTIES = "properties";
+    private static final String PLAYER_TEXTURE = "texture";
+    private static final String PLAYER_CAPE = "cape";
+    private static final String PLAYER_ELYTRA = "elytra";
+    private static final String PLAYER_MODEL = "model";
+    private static final String PLAYER_HAT = "hat";
+    private static final String PROFILE_PROPERTY_NAME = "name";
+    private static final String PROFILE_PROPERTY_VALUE = "value";
+    private static final String PROFILE_PROPERTY_SIGNATURE = "signature";
 
     private final OptionState flags;
     public final boolean modernHoverEvent;
@@ -133,6 +155,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 type = TYPE_SELECTOR;
             } else if (compound.containsKey(NBT) && (compound.containsKey(NBT_SOURCE) || compound.containsKey(NBT_BLOCK) || compound.containsKey(NBT_STORAGE) || compound.containsKey(NBT_ENTITY))) {
                 type = TYPE_NBT;
+            } else if (compound.containsKey(OBJECT)) {
+                type = TYPE_OBJECT;
             } else {
                 throw new IllegalArgumentException("Could not infer the type of the component");
             }
@@ -145,13 +169,14 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
             binaryChildren.forEach(child -> children.add(this.deserialize(child)));
 
         switch (type) {
-            case TYPE_TEXT:
+            case TYPE_TEXT -> {
                 return Component.text()
                         .content(compound.getString(TEXT))
                         .style(style)
                         .append(children)
                         .build();
-            case TYPE_TRANSLATABLE:
+            }
+            case TYPE_TRANSLATABLE -> {
                 ListTag binaryArguments = compound.getList(TRANSLATE_WITH);
                 String fallback = compound.getString(TRANSLATE_FALLBACK);
                 List<Component> arguments = new ArrayList<>();
@@ -167,13 +192,15 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         .style(style)
                         .append(children)
                         .build();
-            case TYPE_KEYBIND:
+            }
+            case TYPE_KEYBIND -> {
                 return Component.keybind()
                         .keybind(compound.getString(KEYBIND))
                         .style(style)
                         .append(children)
                         .build();
-            case TYPE_SCORE:
+            }
+            case TYPE_SCORE -> {
                 CompoundTag binaryScore = compound.getCompound(SCORE);
                 String scoreName = binaryScore.getString(SCORE_NAME);
                 String scoreObjective = binaryScore.getString(SCORE_OBJECTIVE);
@@ -183,7 +210,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         .style(style)
                         .append(children)
                         .build();
-            case TYPE_SELECTOR:
+            }
+            case TYPE_SELECTOR -> {
                 String selector = compound.getString(SELECTOR);
                 Component selectorSeparator = null;
                 Tag binarySelectorSeparator = compound.get(SELECTOR_SEPARATOR);
@@ -196,7 +224,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         .style(style)
                         .append(children)
                         .build();
-            case TYPE_NBT:
+            }
+            case TYPE_NBT -> {
                 String nbtPath = compound.getString(NBT);
                 boolean nbtInterpret = compound.getBoolean(NBT_INTERPRET);
                 Component nbtSeparator = null;
@@ -238,8 +267,55 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                             .append(children)
                             .build();
                 }
-            default:
+
+                throw new IllegalStateException("Could parse nbt component: " + input.toString());
+            }
+            case TYPE_OBJECT -> {
+                String object = compound.getString(OBJECT);
+                if (object.equals(PLAYER_CAPE)) {
+                    PlayerHeadObjectContents.Builder builder = ObjectContents.playerHead();
+                    if (compound.getBoolean(PLAYER_HAT)) {
+                        builder.hat(true);
+                    }
+                    Optional.ofNullable(compound.getString(PLAYER_NAME)).ifPresent(builder::name);
+                    Optional.ofNullable(compound.getString(PLAYER_TEXTURE)).ifPresent(texture -> {
+                        builder.texture(Key.key(texture));
+                    });
+                    Optional.ofNullable(compound.getIntArray(PLAYER_ID)).ifPresent(uuid -> {
+                        builder.id(UUIDUtil.uuidFromIntArray(uuid));
+                    });
+                    Optional.ofNullable(compound.getList(PLAYER_PROPERTIES)).ifPresent(properties -> {
+                        List<PlayerHeadObjectContents.ProfileProperty> profileProperties = new ArrayList<>();
+                        for (Tag propertyTag : properties) {
+                            if (propertyTag instanceof CompoundTag compoundTag) {
+                                String name = compoundTag.getString(PROFILE_PROPERTY_NAME);
+                                String value = compoundTag.getString(PROFILE_PROPERTY_VALUE);
+                                String signature = compoundTag.getString(PROFILE_PROPERTY_SIGNATURE);
+                                if (signature == null) {
+                                    profileProperties.add(PlayerHeadObjectContents.property(name, value));
+                                } else {
+                                    profileProperties.add(PlayerHeadObjectContents.property(name, signature, value));
+                                }
+                            }
+                        }
+                        builder.profileProperties(profileProperties);
+                    });
+                    return Component.object(builder.build());
+                } else if (object.equals(ATLAS)) {
+                    String sprite = compound.getString(SPRITE);
+                    String atlas = compound.getString(ATLAS);
+                    if (atlas != null) {
+                        return Component.object(ObjectContents.sprite(Key.key(atlas), Key.key(sprite)));
+                    } else {
+                        return Component.object(ObjectContents.sprite(Key.key(sprite)));
+                    }
+                } else {
+                    throw new IllegalStateException("Could parse object component: " + input.toString());
+                }
+            }
+            default -> {
                 throw new IllegalArgumentException("Unknown component type " + type);
+            }
         }
     }
 
@@ -255,63 +331,113 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
     private @NotNull CompoundTag writeCompoundComponent(@NotNull Component component) {
         CompoundTag builder = new CompoundTag();
         NBTStyleSerializer.serialize(component.style(), builder, this);
-        if (component instanceof TextComponent) {
-            this.writeComponentType(TYPE_TEXT, builder);
-            builder.putString(TEXT, ((TextComponent) component).content());
-        } else if (component instanceof TranslatableComponent) {
-            this.writeComponentType(TYPE_TRANSLATABLE, builder);
-            TranslatableComponent translatable = (TranslatableComponent) component;
-            builder.putString(TRANSLATE_KEY, translatable.key());
-            List<TranslationArgument> arguments = translatable.arguments();
-            if (!arguments.isEmpty()) {
-                List<Tag> argumentsTags = new ArrayList<>();
-                for (TranslationArgument argument : arguments) {
-                    argumentsTags.add(this.writeCompoundComponent(argument.asComponent()));
+        switch (component) {
+            case TextComponent textComponent -> {
+                this.writeComponentType(TYPE_TEXT, builder);
+                builder.putString(TEXT, textComponent.content());
+            }
+            case TranslatableComponent translatableComponent -> {
+                this.writeComponentType(TYPE_TRANSLATABLE, builder);
+                builder.putString(TRANSLATE_KEY, translatableComponent.key());
+                List<TranslationArgument> arguments = translatableComponent.arguments();
+                if (!arguments.isEmpty()) {
+                    List<Tag> argumentsTags = new ArrayList<>();
+                    for (TranslationArgument argument : arguments) {
+                        argumentsTags.add(this.writeCompoundComponent(argument.asComponent()));
+                    }
+                    builder.put(TRANSLATE_WITH, new ListTag(argumentsTags));
                 }
-                builder.put(TRANSLATE_WITH, new ListTag(argumentsTags));
+                String fallback = translatableComponent.fallback();
+                if (fallback != null) {
+                    builder.putString(TRANSLATE_FALLBACK, fallback);
+                }
             }
-            String fallback = translatable.fallback();
-            if (fallback != null) {
-                builder.putString(TRANSLATE_FALLBACK, fallback);
+            case KeybindComponent keybindComponent -> {
+                this.writeComponentType(TYPE_KEYBIND, builder);
+                builder.putString(KEYBIND, keybindComponent.keybind());
             }
-        } else if (component instanceof KeybindComponent) {
-            this.writeComponentType(TYPE_KEYBIND, builder);
-            builder.putString(KEYBIND, ((KeybindComponent) component).keybind());
-        } else if (component instanceof ScoreComponent) {
-            this.writeComponentType(TYPE_SCORE, builder);
-            ScoreComponent score = (ScoreComponent) component;
-            CompoundTag scoreBuilder = new CompoundTag();
-            scoreBuilder.putString(SCORE_NAME, score.name());
-            scoreBuilder.putString(SCORE_OBJECTIVE, score.objective());
-            builder.put(SCORE, scoreBuilder);
-        } else if (component instanceof SelectorComponent) {
-            this.writeComponentType(TYPE_SELECTOR, builder);
-            SelectorComponent selector = (SelectorComponent) component;
-            builder.putString(SELECTOR, selector.pattern());
-            Component separator = selector.separator();
-            if (separator != null) {
-                builder.put(SELECTOR_SEPARATOR, this.serialize(separator));
+            case ScoreComponent selectorComponent -> {
+                this.writeComponentType(TYPE_SCORE, builder);
+                CompoundTag scoreBuilder = new CompoundTag();
+                scoreBuilder.putString(SCORE_NAME, selectorComponent.name());
+                scoreBuilder.putString(SCORE_OBJECTIVE, selectorComponent.objective());
+                builder.put(SCORE, scoreBuilder);
             }
-        } else if (component instanceof NBTComponent) {
-            this.writeComponentType(TYPE_NBT, builder);
-            NBTComponent<?, ?> nbt = (NBTComponent<?, ?>) component;
-            builder.putString(NBT, nbt.nbtPath());
-            builder.putBoolean(NBT_INTERPRET, nbt.interpret());
-            Component separator = nbt.separator();
-            if (separator != null) {
-                builder.put(NBT_SEPARATOR, this.serialize(separator));
+            case SelectorComponent selectorComponent -> {
+                this.writeComponentType(TYPE_SELECTOR, builder);
+                builder.putString(SELECTOR, selectorComponent.pattern());
+                Component separator = selectorComponent.separator();
+                if (separator != null) {
+                    builder.put(SELECTOR_SEPARATOR, this.serialize(separator));
+                }
             }
-            if (nbt instanceof BlockNBTComponent) {
-                builder.putString(NBT_BLOCK, ((BlockNBTComponent) nbt).pos().asString());
-            } else if (nbt instanceof EntityNBTComponent) {
-                builder.putString(NBT_ENTITY, ((EntityNBTComponent) nbt).selector());
-            } else if (nbt instanceof StorageNBTComponent) {
-                builder.putString(NBT_STORAGE, ((StorageNBTComponent) nbt).storage().asString());
-            } else {
-                throw notSureHowToSerialize(component);
+            case NBTComponent nbtComponent -> {
+                this.writeComponentType(TYPE_NBT, builder);
+                builder.putString(NBT, nbtComponent.nbtPath());
+                builder.putBoolean(NBT_INTERPRET, nbtComponent.interpret());
+                Component separator = nbtComponent.separator();
+                if (separator != null) {
+                    builder.put(NBT_SEPARATOR, this.serialize(separator));
+                }
+                if (nbtComponent instanceof BlockNBTComponent blockNBTComponent) {
+                    builder.putString(NBT_BLOCK, blockNBTComponent.pos().asString());
+                } else if (nbtComponent instanceof EntityNBTComponent entityNBTComponent) {
+                    builder.putString(NBT_ENTITY, entityNBTComponent.selector());
+                } else if (nbtComponent instanceof StorageNBTComponent storageNBTComponent) {
+                    builder.putString(NBT_STORAGE, storageNBTComponent.storage().asString());
+                } else {
+                    throw notSureHowToSerialize(component);
+                }
             }
-        } else {
-            throw notSureHowToSerialize(component);
+            case ObjectComponent objectComponent -> {
+                this.writeComponentType(TYPE_OBJECT, builder);
+                ObjectContents contents = objectComponent.contents();
+                if (contents instanceof SpriteObjectContents spriteObjectContents) {
+                    builder.putString(OBJECT, ATLAS);
+                    Key atlas = spriteObjectContents.atlas();
+                    if (atlas != null) {
+                        builder.putString(ATLAS, atlas.asString());
+                    }
+                    builder.putString(SPRITE, spriteObjectContents.sprite().asString());
+                } else if (contents instanceof PlayerHeadObjectContents playerHeadObjectContents) {
+                    builder.putString(OBJECT, PLAYER);
+                    if (playerHeadObjectContents.hat()) {
+                        builder.putBoolean(PLAYER_HAT, true);
+                    }
+                    CompoundTag playerHead = new CompoundTag();
+                    Key texture = playerHeadObjectContents.texture();
+                    if (texture != null) {
+                        playerHead.putString(PLAYER_TEXTURE, texture.asString());
+                    }
+                    String name = playerHeadObjectContents.name();
+                    if (name != null) {
+                        playerHead.putString(PLAYER_NAME, name);
+                    }
+                    UUID uuid = playerHeadObjectContents.id();
+                    if (uuid != null) {
+                        playerHead.putIntArray(PLAYER_ID, UUIDUtil.uuidToIntArray(uuid));
+                    }
+                    // TODO cape呢？？？
+                    // TODO model呢？？？
+                    List<PlayerHeadObjectContents.ProfileProperty> profileProperties = playerHeadObjectContents.profileProperties();
+                    if (!profileProperties.isEmpty()) {
+                        ListTag proproperties = new ListTag();
+                        for (PlayerHeadObjectContents.ProfileProperty profileProperty : profileProperties) {
+                            CompoundTag propertyTag = new CompoundTag();
+                            propertyTag.putString(PROFILE_PROPERTY_NAME, profileProperty.name());
+                            propertyTag.putString(PROFILE_PROPERTY_VALUE, profileProperty.value());
+                            String signature = profileProperty.signature();
+                            if (signature != null) {
+                                propertyTag.putString(PROFILE_PROPERTY_SIGNATURE, signature);
+                            }
+                            proproperties.add(propertyTag);
+                        }
+                        playerHead.put(PLAYER_PROPERTIES, proproperties);
+                    }
+                    builder.put(PLAYER, playerHead);
+                }
+            }
+            default -> throw notSureHowToSerialize(component);
         }
         List<Component> children = component.children();
         if (!children.isEmpty()) {
@@ -338,7 +464,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
         return new IllegalArgumentException("Don't know how to serialize " + component + " as a Component");
     }
 
-    static final class BuilderImpl implements NBTComponentSerializer.Builder {
+    static final class BuilderImpl implements Builder {
         private OptionState flags = OptionState.emptyOptionState();
 
         BuilderImpl() {
