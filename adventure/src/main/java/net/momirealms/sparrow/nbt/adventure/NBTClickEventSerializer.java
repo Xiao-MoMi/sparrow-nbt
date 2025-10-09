@@ -1,6 +1,7 @@
 package net.momirealms.sparrow.nbt.adventure;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
@@ -49,7 +50,11 @@ class NBTClickEventSerializer {
                     return ClickEvent.clickEvent(action, ClickEvent.Payload.dialog(NBTDialog.of(tag.get(CLICK_EVENT_DIALOG))));
                 }
                 case CUSTOM -> {
-                    return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), tag.getString(CLICK_EVENT_CUSTOM_PAYLOAD)));
+                    if (tag.containsKey(CLICK_EVENT_CUSTOM_PAYLOAD)) {
+                        return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), BinaryTagHolder.binaryTagHolder(tag.getString(CLICK_EVENT_CUSTOM_PAYLOAD))));
+                    } else {
+                        return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), BinaryTagHolder.binaryTagHolder("")));
+                    }
                 }
                 default -> throw new IllegalArgumentException("The serialized click event doesn't contain an action");
             }
@@ -78,7 +83,10 @@ class NBTClickEventSerializer {
                 case CUSTOM -> {
                     ClickEvent.Payload.Custom custom = (ClickEvent.Payload.Custom) payload;
                     tag.putString(CLICK_EVENT_CUSTOM_ID, custom.key().asString());
-                    tag.putString(CLICK_EVENT_CUSTOM_PAYLOAD, custom.nbt().string());
+                    String data = custom.nbt().string();
+                    if (!data.isEmpty()) {
+                        tag.putString(CLICK_EVENT_CUSTOM_PAYLOAD, data);
+                    }
                 }
             }
         } else {
