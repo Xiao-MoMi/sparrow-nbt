@@ -15,6 +15,10 @@ public class StringTag implements Tag {
         input.skipBytes(input.readUnsignedShort());
     }
 
+    public String value() {
+        return value;
+    }
+
     @Override
     public void write(DataOutput output) throws IOException {
         output.writeUTF(this.value);

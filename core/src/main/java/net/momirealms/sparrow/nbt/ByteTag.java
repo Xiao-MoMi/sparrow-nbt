@@ -14,6 +14,10 @@ public final class ByteTag extends NumericTag {
         this.value = (byte) (b ? 1 : 0);
     }
 
+    public byte value() {
+        return value;
+    }
+
     public boolean booleanValue() {
         return this.value != 0;
     }

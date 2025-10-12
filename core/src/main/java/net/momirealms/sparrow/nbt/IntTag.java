@@ -10,6 +10,10 @@ public class IntTag extends NumericTag {
         this.value = value;
     }
 
+    public int value() {
+        return value;
+    }
+
     @Override
     public long getAsLong() {
         return value;

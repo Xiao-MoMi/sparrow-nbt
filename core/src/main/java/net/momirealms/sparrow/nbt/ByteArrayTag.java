@@ -119,6 +119,10 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
         return this.value;
     }
 
+    public byte[] value() {
+        return value;
+    }
+
     @Override
     public String toString() {
         return this.getAsString();

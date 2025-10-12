@@ -13,6 +13,10 @@ public class DoubleTag extends NumericTag {
         this.value = value;
     }
 
+    public double value() {
+        return value;
+    }
+
     @Override
     public long getAsLong() {
         return (long) Math.floor(this.value);

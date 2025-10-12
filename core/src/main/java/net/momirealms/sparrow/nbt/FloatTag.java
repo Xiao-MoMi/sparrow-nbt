@@ -12,6 +12,10 @@ public class FloatTag extends NumericTag {
         this.value = value;
     }
 
+    public float value() {
+        return value;
+    }
+
     @Override
     public void write(DataOutput output) throws IOException {
         output.writeFloat(this.value);

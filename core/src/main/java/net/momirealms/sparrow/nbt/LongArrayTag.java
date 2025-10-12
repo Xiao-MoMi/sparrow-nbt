@@ -122,6 +122,10 @@ public class LongArrayTag extends CollectionTag<LongTag> {
         return this.value;
     }
 
+    public long[] value() {
+        return value;
+    }
+
     @Override
     public String toString() {
         return this.getAsString();

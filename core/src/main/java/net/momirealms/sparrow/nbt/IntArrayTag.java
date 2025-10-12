@@ -124,6 +124,10 @@ public class IntArrayTag extends CollectionTag<IntTag> {
         return this.value;
     }
 
+    public int[] value() {
+        return value;
+    }
+
     public UUID getAsUUID() {
         if (this.value.length != 4) {
             throw new IllegalArgumentException("Failed to convert IntArray into UUID because the length of the array is " + value.length + " which is expected to be 4.");
