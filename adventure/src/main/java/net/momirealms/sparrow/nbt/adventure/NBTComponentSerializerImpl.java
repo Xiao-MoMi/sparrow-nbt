@@ -31,10 +31,7 @@ import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import net.kyori.adventure.text.object.SpriteObjectContents;
 import net.kyori.adventure.util.Services;
 import net.kyori.option.OptionState;
-import net.momirealms.sparrow.nbt.CompoundTag;
-import net.momirealms.sparrow.nbt.ListTag;
-import net.momirealms.sparrow.nbt.StringTag;
-import net.momirealms.sparrow.nbt.Tag;
+import net.momirealms.sparrow.nbt.*;
 import net.momirealms.sparrow.nbt.util.UUIDUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -177,12 +174,12 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         .build();
             }
             case TYPE_TRANSLATABLE -> {
-                ListTag binaryArguments = compound.getList(TRANSLATE_WITH);
-                String fallback = compound.getString(TRANSLATE_FALLBACK);
                 List<Component> arguments = new ArrayList<>();
-                if (binaryArguments != null) {
-                    for (Tag argument : binaryArguments) {
-                        arguments.add(this.deserialize(argument));
+                String fallback = compound.getString(TRANSLATE_FALLBACK);
+                Tag with = compound.get(TRANSLATE_WITH);
+                if (with instanceof CollectionTag args) {
+                    for (int i = 0; i < args.size(); i++) {
+                        arguments.add(this.deserialize(args.get(i)));
                     }
                 }
                 return Component.translatable()

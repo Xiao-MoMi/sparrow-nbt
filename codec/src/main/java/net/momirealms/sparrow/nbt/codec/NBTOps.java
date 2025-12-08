@@ -39,8 +39,7 @@ public class NBTOps implements DynamicOps<Tag> {
             case 4 -> convertedValue = dynamicOps.createLong(((NumericTag) tag).getAsLong());
             case 5 -> convertedValue = dynamicOps.createFloat(((NumericTag) tag).getAsFloat());
             case 6 -> convertedValue = dynamicOps.createDouble(((NumericTag) tag).getAsDouble());
-            case 7 ->
-                    convertedValue = dynamicOps.createByteList(ByteBuffer.wrap(((ByteArrayTag) tag).getAsByteArray()));
+            case 7 -> convertedValue = dynamicOps.createByteList(ByteBuffer.wrap(((ByteArrayTag) tag).getAsByteArray()));
             case 8 -> convertedValue = dynamicOps.createString(tag.getAsString());
             case 9 -> convertedValue = this.convertList(dynamicOps, tag);
             case 10 -> convertedValue = this.convertMap(dynamicOps, tag);

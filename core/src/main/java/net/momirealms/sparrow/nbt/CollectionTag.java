@@ -41,6 +41,17 @@ public abstract class CollectionTag<T extends Tag> extends AbstractList<T> imple
     public abstract T remove(int index);
 
     /**
+     * Returns the tag at the specified index in the collection.
+     *
+     * @param index the index of the tag to return
+     * @return the tag at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         (index < 0 || index >= size())
+     */
+    @Override
+    public abstract T get(int index);
+
+    /**
      * Replaces the tag at the specified index with the given tag.
      * Unlike {@link #set}, this method allows any {@link Tag} type.
      *
