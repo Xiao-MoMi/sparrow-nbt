@@ -3,9 +3,6 @@ plugins {
     id("maven-publish")
 }
 
-group = "net.momirealms"
-version = "0.8.4"
-
 repositories {
     mavenCentral()
     maven("https://libraries.minecraft.net/")
@@ -13,7 +10,6 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
-
     compileOnly("com.mojang:datafixerupper:8.0.16")
 }
 
