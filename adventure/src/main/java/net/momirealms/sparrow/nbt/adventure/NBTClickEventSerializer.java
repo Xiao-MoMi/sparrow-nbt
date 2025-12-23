@@ -50,8 +50,9 @@ class NBTClickEventSerializer {
                     return ClickEvent.clickEvent(action, ClickEvent.Payload.dialog(NBTDialog.of(tag.get(CLICK_EVENT_DIALOG))));
                 }
                 case CUSTOM -> {
-                    if (tag.containsKey(CLICK_EVENT_CUSTOM_PAYLOAD)) {
-                        return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), BinaryTagHolder.binaryTagHolder(tag.getString(CLICK_EVENT_CUSTOM_PAYLOAD))));
+                    String b = tag.getString(CLICK_EVENT_CUSTOM_PAYLOAD);
+                    if (b != null) {
+                        return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), BinaryTagHolder.binaryTagHolder(b)));
                     } else {
                         return ClickEvent.clickEvent(action, ClickEvent.Payload.custom(Key.key(tag.getString(CLICK_EVENT_CUSTOM_ID)), BinaryTagHolder.binaryTagHolder("")));
                     }
