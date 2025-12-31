@@ -291,7 +291,7 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                                 if (signature == null) {
                                     profileProperties.add(PlayerHeadObjectContents.property(name, value));
                                 } else {
-                                    profileProperties.add(PlayerHeadObjectContents.property(name, signature, value));
+                                    profileProperties.add(PlayerHeadObjectContents.property(name, value, signature));
                                 }
                             }
                         }
