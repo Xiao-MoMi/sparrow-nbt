@@ -150,10 +150,10 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 type = TYPE_SCORE;
             } else if (compound.containsKey(SELECTOR)) {
                 type = TYPE_SELECTOR;
+            } else if (compound.containsKey(SPRITE) || compound.containsKey(PLAYER)) {
+                type = TYPE_OBJECT;
             } else if (compound.containsKey(NBT) && (compound.containsKey(NBT_SOURCE) || compound.containsKey(NBT_BLOCK) || compound.containsKey(NBT_STORAGE) || compound.containsKey(NBT_ENTITY))) {
                 type = TYPE_NBT;
-            } else if (compound.containsKey(OBJECT) || compound.containsKey(SPRITE) || compound.containsKey(PLAYER)) {
-                type = TYPE_OBJECT;
             } else {
                 throw new IllegalArgumentException("Could not infer the type of the component:" + input.toString());
             }
@@ -299,20 +299,17 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     });
                     return Component
                             .object(builder.build())
+                            .style(style)
                             .append(children);
                 }
                 if (compound.containsKey(SPRITE)) {
                     String sprite = compound.getString(SPRITE);
                     String atlas = compound.getString(ATLAS);
-                    if (atlas != null) {
-                        return Component
-                                .object(ObjectContents.sprite(Key.key(atlas), Key.key(sprite)))
-                                .append(children);
-                    } else {
-                        return Component
-                                .object(ObjectContents.sprite(Key.key(sprite)))
-                                .append(children);
-                    }
+                    Key atlasKey = atlas == null ? SpriteObjectContents.DEFAULT_ATLAS : Key.key(atlas);
+                    return Component
+                            .object(ObjectContents.sprite(atlasKey, Key.key(sprite)))
+                            .style(style)
+                            .append(children);
                 }
                 throw new IllegalStateException("Could parse object component: " + input.toString());
             }
@@ -404,8 +401,8 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     builder.putString(SPRITE, spriteObjectContents.sprite().asString());
                 } else if (contents instanceof PlayerHeadObjectContents playerHeadObjectContents) {
                     builder.putString(OBJECT, PLAYER);
-                    if (playerHeadObjectContents.hat()) {
-                        builder.putBoolean(PLAYER_HAT, true);
+                    if (!playerHeadObjectContents.hat()) {
+                        builder.putBoolean(PLAYER_HAT, false);
                     }
                     CompoundTag playerHead = new CompoundTag();
                     Key texture = playerHeadObjectContents.texture();
@@ -420,8 +417,6 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     if (uuid != null) {
                         playerHead.putIntArray(PLAYER_ID, UUIDUtil.uuidToIntArray(uuid));
                     }
-                    // TODO cape呢？？？
-                    // TODO model呢？？？
                     List<PlayerHeadObjectContents.ProfileProperty> profileProperties = playerHeadObjectContents.profileProperties();
                     if (!profileProperties.isEmpty()) {
                         ListTag proproperties = new ListTag();
