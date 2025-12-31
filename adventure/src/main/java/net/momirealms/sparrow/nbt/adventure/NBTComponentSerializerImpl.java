@@ -297,15 +297,21 @@ class NBTComponentSerializerImpl implements NBTComponentSerializer {
                         }
                         builder.profileProperties(profileProperties);
                     });
-                    return Component.object(builder.build());
+                    return Component
+                            .object(builder.build())
+                            .append(children);
                 }
                 if (compound.containsKey(SPRITE)) {
                     String sprite = compound.getString(SPRITE);
                     String atlas = compound.getString(ATLAS);
                     if (atlas != null) {
-                        return Component.object(ObjectContents.sprite(Key.key(atlas), Key.key(sprite)));
+                        return Component
+                                .object(ObjectContents.sprite(Key.key(atlas), Key.key(sprite)))
+                                .append(children);
                     } else {
-                        return Component.object(ObjectContents.sprite(Key.key(sprite)));
+                        return Component
+                                .object(ObjectContents.sprite(Key.key(sprite)))
+                                .append(children);
                     }
                 }
                 throw new IllegalStateException("Could parse object component: " + input.toString());
