@@ -98,7 +98,7 @@ class NBTHoverEventSerializer {
         HoverEvent.Action<?> action = HoverEvent.Action.NAMES.valueOrThrow(compound.getString(HOVER_EVENT_ACTION));
         Tag contents = compound.get(HOVER_EVENT_CONTENTS);
         if (contents == null) {
-            throw new IllegalArgumentException("The hover event doesn't contain any contents");
+            return null;
         }
         Class<?> actionType = action.type();
         if (Component.class.isAssignableFrom(actionType)) {
