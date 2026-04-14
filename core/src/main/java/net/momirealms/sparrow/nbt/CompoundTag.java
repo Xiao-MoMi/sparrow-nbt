@@ -34,6 +34,11 @@ public class CompoundTag implements Tag {
         return this.tags.entrySet();
     }
 
+    @NotNull
+    public Collection<Tag> values() {
+        return this.tags.values();
+    }
+
     /**
      * Adds or replaces a tag with the specified key.
      *
@@ -43,7 +48,11 @@ public class CompoundTag implements Tag {
      */
     @Nullable
     public Tag put(@NotNull String key, Tag element) {
-        return this.tags.put(key, element);
+        if (element == null) {
+            return this.tags.remove(key);
+        } else {
+            return this.tags.put(key, element);
+        }
     }
 
     /**
