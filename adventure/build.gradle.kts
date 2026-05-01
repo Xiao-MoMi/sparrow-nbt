@@ -13,6 +13,10 @@ dependencies {
     compileOnly("net.kyori:adventure-api:5.0.1")
     compileOnly("net.kyori:option:1.1.0")
     compileOnly(project(":core"))
+
+    testImplementation("net.kyori:adventure-api:5.0.1")
+    testImplementation("net.kyori:option:1.1.0")
+    testImplementation(project(":core"))
 }
 
 java {
