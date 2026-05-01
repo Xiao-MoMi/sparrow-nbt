@@ -297,7 +297,8 @@ final class NBTComponentSerializerImpl implements NBTComponentSerializer {
                 if (!args.isEmpty()) {
                     List<Tag> argumentsTags = new ArrayList<>(args.size());
                     for (int i = 0, size = args.size(); i < size; i++) {
-                        argumentsTags.add(serialize(args.get(i).asComponent()));
+                        TranslationArgument translationArgument = args.get(i);
+                        argumentsTags.add(serializeTranslationArgument(translationArgument));
                     }
                     tag.put(TRANSLATE_WITH, new ListTag(argumentsTags));
                 }
@@ -409,6 +410,21 @@ final class NBTComponentSerializerImpl implements NBTComponentSerializer {
         if (this.serializeComponentType) {
             tag.putString("type", componentType);
         }
+    }
+
+    private Tag serializeTranslationArgument(TranslationArgument argument) {
+        Object value = argument.value();
+        return switch (value) {
+            case Boolean bool -> new ByteTag(bool);
+            case Byte b -> new ByteTag(b);
+            case Short s -> new ShortTag(s);
+            case Integer i -> new IntTag(i);
+            case Long l -> new LongTag(l);
+            case Float f -> new FloatTag(f);
+            case Number d -> new DoubleTag(d.doubleValue());
+            case Component c -> serialize(c);
+            default -> throw new IllegalStateException("Unexpected translation argument: " + argument);
+        };
     }
 
     private void serializeStyle(CompoundTag tag, Style style) {
@@ -976,13 +992,21 @@ final class NBTComponentSerializerImpl implements NBTComponentSerializer {
                     builder.fallback(fallback);
                 }
                 if (input.get(TRANSLATE_WITH) instanceof ListTag listTag) {
-                    List<Component> arguments = new ArrayList<>(listTag.size());
+                    List<ComponentLike> arguments = new ArrayList<>(listTag.size());
                     for (int i = 0, size = listTag.size(); i < size; i++) {
-                        arguments.add(serializer.deserialize(listTag.get(i)));
+                        arguments.add(deserializeTranslationArgument(serializer, listTag.get(i)));
                     }
                     builder.arguments(arguments);
                 }
                 return builder;
+            }
+
+            private ComponentLike deserializeTranslationArgument(NBTComponentSerializer serializer, Tag tag) {
+                if (tag instanceof NumericTag numericTag) {
+                    return TranslationArgument.numeric(numericTag.getAsNumber());
+                } else {
+                    return serializer.deserialize(tag);
+                }
             }
         }
 
