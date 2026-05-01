@@ -10,10 +10,10 @@ repositories {
 ```
 ```kotlin
 dependencies {
-    implementation("net.momirealms:sparrow-nbt:0.17")  // Core Module
-    implementation("net.momirealms:sparrow-nbt-adventure:0.17")  // for adventure component support
-    implementation("net.momirealms:sparrow-nbt-codec:0.17")  // for DFU 8.0+
-    implementation("net.momirealms:sparrow-nbt-legacy-codec:0.17")  // for DFU 6.0+
+    implementation("net.momirealms:sparrow-nbt:0.18.1")  // Core Module
+    implementation("net.momirealms:sparrow-nbt-adventure:0.18.1")  // for adventure component support
+    implementation("net.momirealms:sparrow-nbt-codec:0.18.1")  // for DFU 8.0+
+    implementation("net.momirealms:sparrow-nbt-legacy-codec:0.18.1")  // for DFU 6.0+
 }
 ```
 Special thanks to [adventure](https://github.com/KyoriPowered/adventure) for their awesome work, which inspired this project.

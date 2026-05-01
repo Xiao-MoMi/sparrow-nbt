@@ -1129,7 +1129,7 @@ final class NBTComponentSerializerImpl implements NBTComponentSerializer {
     }
 
     static final class BuilderImpl implements Builder {
-        private OptionState flags = OptionSchema.emptySchema().emptyState();
+        private OptionState flags = NBTSerializerOptions.SCHEMA.emptyState();
 
         BuilderImpl() {
             BUILDER.accept(this);
@@ -1143,7 +1143,7 @@ final class NBTComponentSerializerImpl implements NBTComponentSerializer {
 
         @Override
         public @NotNull Builder editOptions(@NotNull Consumer<OptionState.Builder> optionEditor) {
-            final OptionState.Builder builder = OptionSchema.emptySchema().stateBuilder()
+            final OptionState.Builder builder = NBTSerializerOptions.SCHEMA.stateBuilder()
                     .values(this.flags);
             requireNonNull(optionEditor, "flagEditor").accept(builder);
             this.flags = builder.build();
