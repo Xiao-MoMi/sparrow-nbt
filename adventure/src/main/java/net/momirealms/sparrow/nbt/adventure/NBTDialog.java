@@ -3,7 +3,7 @@ package net.momirealms.sparrow.nbt.adventure;
 import net.kyori.adventure.dialog.DialogLike;
 import net.momirealms.sparrow.nbt.Tag;
 
-public class NBTDialog implements DialogLike {
+public final class NBTDialog implements DialogLike {
     private final Tag dialog;
 
     public NBTDialog(Tag dialog) {
@@ -15,6 +15,6 @@ public class NBTDialog implements DialogLike {
     }
 
     public Tag tag() {
-        return dialog;
+        return this.dialog;
     }
 }

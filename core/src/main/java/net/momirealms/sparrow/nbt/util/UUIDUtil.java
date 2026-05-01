@@ -10,6 +10,10 @@ public class UUIDUtil {
         return new UUID((long) array[0] << 32 | (long) array[1] & 4294967295L, (long) array[2] << 32 | (long) array[3] & 4294967295L);
     }
 
+    public static UUID uuidFromInts(int a, int b, int c, int d) {
+        return new UUID((long) a << 32 | (long) b & 4294967295L, (long) c << 32 | (long) d & 4294967295L);
+    }
+
     public static int[] uuidToIntArray(UUID uuid) {
         long l = uuid.getMostSignificantBits();
         long m = uuid.getLeastSignificantBits();

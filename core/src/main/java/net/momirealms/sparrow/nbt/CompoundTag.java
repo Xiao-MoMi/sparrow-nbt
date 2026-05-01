@@ -20,6 +20,10 @@ public class CompoundTag implements Tag {
         this.tags = new HashMap<>(8, 0.8f);
     }
 
+    public CompoundTag(int initialCapacity, float loadFactor) {
+        this.tags = new HashMap<>(initialCapacity, loadFactor);
+    }
+
     public int size() {
         return tags.size();
     }

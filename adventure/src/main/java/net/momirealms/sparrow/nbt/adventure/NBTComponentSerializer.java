@@ -2,30 +2,35 @@ package net.momirealms.sparrow.nbt.adventure;
 
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.util.PlatformAPI;
 import net.kyori.option.OptionState;
-import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public interface NBTComponentSerializer extends ComponentSerializer<Component, Component, Tag> {
+@SuppressWarnings("UnstableApiUsage")
+public interface NBTComponentSerializer extends ComponentSerializer<@NotNull Component, @NotNull Component, Tag> {
 
-    @NotNull Style deserializeStyle(@NotNull CompoundTag tag);
-
-    @NotNull CompoundTag serializeStyle(@NotNull Style style);
-
-    static @NotNull NBTComponentSerializer nbt() {
+    static NBTComponentSerializer nbt() {
         return NBTComponentSerializerImpl.Instances.INSTANCE;
     }
 
     static @NotNull Builder builder() {
         return new NBTComponentSerializerImpl.BuilderImpl();
     }
+
+    boolean modernEvent();
+
+    boolean dataComponentRelease();
+
+    boolean compactTextComponent();
+
+    boolean serializeComponentType();
+
+    boolean intArrayUUID();
 
     interface Builder extends AbstractBuilder<NBTComponentSerializer> {
 
@@ -43,10 +48,10 @@ public interface NBTComponentSerializer extends ComponentSerializer<Component, C
 
         @ApiStatus.Internal
         @PlatformAPI
-        @NotNull NBTComponentSerializer nbt();
+        NBTComponentSerializer nbt();
 
         @ApiStatus.Internal
         @PlatformAPI
-        @NotNull Consumer<Builder> builder();
+        Consumer<Builder> builder();
     }
 }
